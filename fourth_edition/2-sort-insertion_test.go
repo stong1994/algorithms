@@ -2,9 +2,7 @@ package fourth_edition
 
 import "testing"
 
-var sortList = []Comparable{2, 4, 1, 2, 9, 11, 5, 6, 3, 1, 0, 10, 8}
-
-func TestSelection_Sort(t *testing.T) {
+func TestInsertion_Sort(t *testing.T) {
 	type args struct {
 		list []Comparable
 	}
@@ -13,13 +11,13 @@ func TestSelection_Sort(t *testing.T) {
 		args args
 	}{
 		{
-			name: "normal test",
+			name: "insertion sort",
 			args: args{list: sortList},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sorter := BaseSort{SortImpl: Selection{}}
+			sorter := BaseSort{SortImpl: Insertion{}}
 			sorter.Sort(tt.args.list)
 			sorter.Show(tt.args.list)
 			if !sorter.IsSorted(tt.args.list) {
