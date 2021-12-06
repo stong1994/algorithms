@@ -2,9 +2,7 @@ package fourth_edition
 
 import "testing"
 
-var sortList = []Comparable{2, 4, 1, 2, 9, 11, 5, 6, 3, 1, 0, 10, 8}
-
-func TestSelection_Sort(t *testing.T) {
+func TestShell_Sort(t *testing.T) {
 	type args struct {
 		list []Comparable
 	}
