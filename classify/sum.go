@@ -117,3 +117,58 @@ func fourSumCount(nums1 []int, nums2 []int, nums3 []int, nums4 []int) int {
 	}
 	return totalCount
 }
+
+// 两数相加: https://leetcode-cn.com/problems/add-two-numbers/
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+func addTwoNumbers(l1 *ListNode, l2 *ListNode) *ListNode {
+	var (
+		needAdd1    bool
+		currentNode *ListNode
+		result      *ListNode
+	)
+	for l1 != nil || l2 != nil {
+		val := 0
+		if l1 == nil {
+			val = l2.Val
+			l2 = l2.Next
+		} else if l2 == nil {
+			val = l1.Val
+			l1 = l1.Next
+		} else {
+			val = l1.Val + l2.Val
+			l1 = l1.Next
+			l2 = l2.Next
+		}
+		if needAdd1 {
+			val++
+		}
+		if val >= 10 {
+			val = val - 10
+			needAdd1 = true
+		} else {
+			needAdd1 = false
+		}
+		node := &ListNode{
+			Val:  val,
+			Next: nil,
+		}
+		if currentNode == nil {
+			currentNode = node
+			result = currentNode
+		} else {
+			currentNode.Next = node
+			currentNode = node
+		}
+	}
+	if needAdd1 {
+		currentNode.Next = &ListNode{
+			Val:  1,
+			Next: nil,
+		}
+	}
+	return result
+}
