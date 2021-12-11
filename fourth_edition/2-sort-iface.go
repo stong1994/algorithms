@@ -8,6 +8,14 @@ func (c Comparable) CompareTo(v Comparable) int {
 	return int(c) - int(v)
 }
 
+var comparableNull Comparable = 0
+
+type Comparables []Comparable
+
+func Exch(data Comparables, m, n int) {
+	data[m], data[n] = data[n], data[m]
+}
+
 type ISortable interface {
 	Sort(list []Comparable)
 }
