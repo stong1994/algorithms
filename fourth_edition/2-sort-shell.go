@@ -3,9 +3,7 @@ package fourth_edition
 // 希尔排序。对插入排序的优化：在插入排序中，将当前比较的元素
 // 移动到最前面，需要交换途中的所有元素。希尔排序优化此问题，通过间隔h个元素进行比较-移动，
 // 每遍历完一遍后，数组整体的混乱程度更低，然后不断降低间隔重复这个过程，直到间隔为1。
-type Shell struct {
-	N int
-}
+type Shell struct{}
 
 func (s Shell) Sort(list []Comparable) {
 	N := len(list)
@@ -24,5 +22,4 @@ func (s Shell) Sort(list []Comparable) {
 			}
 		}
 	}
-
 }
