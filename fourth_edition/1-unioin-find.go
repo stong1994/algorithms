@@ -9,7 +9,7 @@ import (
 当程序从输入中读取了整数对p q时，如果已知所有整数对都不能说明p和q是联通的，那么将这一对整数写入输出。
 否则忽略p和q，并继续处理下一对整数。
 应用：通过已有的连接建立两个点的通信或者找到人际关系网
- */
+*/
 
 // 问题抽象
 type IUF interface {
@@ -19,9 +19,9 @@ type IUF interface {
 }
 
 type UF struct {
-	id []int // 分量id（以触点作为索引）
-	count int // 分量数量
-	iuf IUF
+	id    []int // 分量id（以触点作为索引）
+	count int   // 分量数量
+	iuf   IUF
 }
 
 // 初始化并保证没有连通分量
@@ -29,7 +29,7 @@ func (uf *UF) Init(n int) {
 	uf.count = n
 	id := make([]int, n)
 	for i := 0; i < n; i++ {
-		id[i]= i
+		id[i] = i
 	}
 	uf.id = id
 	uf.iuf.Init(n)
@@ -51,7 +51,7 @@ func (uf *UF) Find(p int) int {
 	return uf.iuf.Find(uf, p)
 }
 
-func ExecUF(uf *UF, n int, stdIn [][2]int)  {
+func ExecUF(uf *UF, n int, stdIn [][2]int) {
 	uf.Init(n)
 	for _, v := range stdIn {
 		p := v[0]
@@ -67,10 +67,10 @@ func ExecUF(uf *UF, n int, stdIn [][2]int)  {
 }
 
 // 算法实现
-// 1. quick-find
+// 1. Quick-find
 // 保证当id[p]==id[q]时p和q是连通的，即同一个连通分量上的触点在id中的值是相同的
 // 当union p和q时，要将两个分量在id上的值设为相同
-type quickFind struct {}
+type quickFind struct{}
 
 func (qf *quickFind) Init(n int) {}
 
@@ -95,9 +95,9 @@ func (qf *quickFind) Find(uf *UF, p int) int {
 	return uf.id[p]
 }
 
-// 2. quick union
+// 2. Quick union
 // 保证通过find能找到p的连通分量的根触点
-type quickUnion struct {}
+type quickUnion struct{}
 
 func (qu *quickUnion) Init(n int) {}
 
@@ -119,15 +119,15 @@ func (qu *quickUnion) Find(uf *UF, p int) int {
 	return p
 }
 
-// 3. weighted quick union
-// quick union随机选择一颗树连接到另一颗树上，可以通过加权来优化,使得较小的树去连接较大的树
+// 3. weighted Quick union
+// Quick union随机选择一颗树连接到另一颗树上，可以通过加权来优化,使得较小的树去连接较大的树
 type weightedQuickUnion struct {
 	weights map[int]int
 }
 
 func (qu *weightedQuickUnion) Init(n int) {
 	w := make(map[int]int, n)
-	for i :=0; i<n; i++ {
+	for i := 0; i < n; i++ {
 		w[i] = 1
 	}
 	qu.weights = w
@@ -145,7 +145,7 @@ func (qu *weightedQuickUnion) Union(uf *UF, p, q int) {
 	if pWeight > qWeight {
 		uf.id[q] = pRoot
 		qu.weights[pRoot] += qWeight
-	}else {
+	} else {
 		uf.id[p] = qRoot
 		qu.weights[qRoot] += pWeight
 	}
