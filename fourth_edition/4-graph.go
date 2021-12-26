@@ -213,3 +213,28 @@ func (q *queue) dequeue() int {
 func (q queue) isEmpty() bool {
 	return len(q.list) == 0
 }
+
+type queueString struct {
+	list []string
+}
+
+func newQueueString() *queueString {
+	return &queueString{}
+}
+
+func (q *queueString) enqueue(s string) {
+	q.list = append(q.list, s)
+}
+
+func (q *queueString) dequeue() string {
+	if len(q.list) == 0 {
+		return ""
+	}
+	last := q.list[len(q.list)-1]
+	q.list = q.list[:len(q.list)-1]
+	return last
+}
+
+func (q queueString) isEmpty() bool {
+	return len(q.list) == 0
+}
