@@ -13,7 +13,7 @@ func (k KeyIdxCount) sort(a []int, r int) {
 	count := make([]int, r+2)    // 频率统计数组，索引为对应的元素，值为出现的频率
 	// 计算频率 // 假设a=[2,1,1,5,3,3]
 	for _, v := range a {
-		count[v+1]++ // 必须为v+1？
+		count[v+1]++ // TODO： 必须为v+1？
 	} // count = [0 0 2 1 2 0 1]
 	fmt.Println("1", count)
 	// 将频率转换为索引
