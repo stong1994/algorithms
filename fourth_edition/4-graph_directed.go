@@ -74,6 +74,13 @@ func (d *DirectedDFS) dfs(graph DirectedGraph, v int) {
 	}
 }
 
+func (d *DirectedDFS) dfsMap(graph DirectedGraph, m map[int]struct{}) {
+	d.marked = make([]bool, graph.V())
+	for v := range m {
+		d.dfs(graph, v)
+	}
+}
+
 func (d DirectedDFS) hasMarked(w int) bool {
 	return d.marked[w]
 }
