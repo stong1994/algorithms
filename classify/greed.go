@@ -95,8 +95,54 @@ func findMinArrowShots(points [][]int) int {
 // 每个 people[i] = [hi, ki] 表示第 i 个人的身高为 hi ，前面 正好 有 ki 个身高大于或等于 hi 的人。
 // 请你重新构造并返回输入数组people 所表示的队列。返回的队列应该格式化为数组 queue ，
 // 其中 queue[j] = [hj, kj] 是队列中第 j 个人的属性（queue[0] 是排在队列前面的人）。
+// Input:
+// [[7,0], [4,4], [7,1], [5,0], [6,1], [5,2]]
+// Output:
+// [[5,0], [7,0], [5,2], [6,1], [4,4], [7,1]]
 // 来源：力扣（LeetCode）
 // 链接：https://leetcode-cn.com/problems/queue-reconstruction-by-height
-func reconstructQueue(people [][]int) [][]int {
+// 思路：高个子不用考虑低个子！所以先按个子从高到低排好，再按照规则将个子低的插入到前边（也就是根据kj来做插入）
+//func reconstructQueue(people [][]int) (ans [][]int) {
+//	sort.Slice(people, func(i, j int) bool {
+//		a, b := people[i], people[j]
+//		return a[0] > b[0] || a[0] == b[0] && a[1] < b[1]
+//	})
+//	for _, person := range people {
+//		idx := person[1]
+//		ans = append(ans[:idx], append([][]int{person}, ans[idx:]...)...)
+//	}
+//	return
+//}
 
+func reconstructQueue(people [][]int) [][]int {
+	// 先排序：高个子在前，个子相同的按第二个元素个数排序，个数小的排在前
+	// 再插入：按照队列中高于等于第j个人的数量为kj来判断j的位置
+	sort.Slice(people, func(i, j int) bool {
+		return people[i][0] > people[j][0] || people[i][0] == people[j][0] && people[i][1] < people[j][1]
+	})
+	result := make([][]int, 0, len(people))
+	for _, person := range people {
+		idx := person[1]
+		result = append(result[:idx], append([][]int{person}, result[idx:]...)...)
+	}
+	return result
 }
+
+type queueSort [][]int
+
+func (qs queueSort) Len() int {
+	return len(qs)
+}
+
+func (qs queueSort) Swap(i, j int) {
+	qs[i], qs[j] = qs[j], qs[i]
+}
+
+func (qs queueSort) Less(i, j int) bool {
+	if qs[i][0] == qs[j][0] {
+		return qs[i][1] <= qs[j][1]
+	}
+	return qs[i][0] > qs[j][0]
+}
+
+// 买卖股票最大的收益
