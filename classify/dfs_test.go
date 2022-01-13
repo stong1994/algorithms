@@ -130,7 +130,7 @@ func Test_pacificAtlantic(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Printf("got: %v\n", pacificAtlantic(tt.heights))
+			fmt.Printf("got: %v， want: %v\n", pacificAtlantic(tt.heights), tt.want)
 		})
 	}
 }

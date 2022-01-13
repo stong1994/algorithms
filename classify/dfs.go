@@ -191,15 +191,16 @@ func solve(board [][]byte) {
 //链接：https://leetcode-cn.com/problems/pacific-atlantic-water-flow
 // TODO
 func pacificAtlantic(heights [][]int) [][]int {
+	// 题中~表示太平洋，*表示大西洋。
 	// 反向思考：分别找到大平洋和大西洋能够到达的区域，再获取两者重复的坐标
-	// 能够达到的区域的坐标放在map中，因为两个元素都小于150，因此将第1个元素左移6位（2^8=256）再于第二个元素相加即可
+	// 能够达到的区域的坐标放在map中，因为两个元素都小于150，因此将第1个元素左移8位（2^8=256）再于第二个元素相加即可
 	ySize, xSize := len(heights), len(heights[0])
 
 	getTotalValFn := func(y, x int) int {
-		return y<<6 + x
+		return y<<8 + x
 	}
 	getRealValFn := func(v int) (int, int) {
-		return v >> 6, 150 & v
+		return v >> 8, 255 & v
 	}
 
 	var visitFn func(y, x int, visited map[int]bool)
@@ -229,8 +230,14 @@ func pacificAtlantic(heights [][]int) [][]int {
 	m1 := make(map[int]bool)
 	m2 := make(map[int]bool)
 	var result [][]int
-	visitFn(0, 0, m1)
-	visitFn(ySize-1, xSize-1, m2)
+	for x := 0; x < xSize; x++ {
+		visitFn(0, x, m1)
+		visitFn(ySize-1, x, m2)
+	}
+	for y := 0; y < ySize; y++ {
+		visitFn(y, 0, m1)
+		visitFn(y, xSize-1, m2)
+	}
 	for k := range m1 {
 		if m2[k] {
 			y, x := getRealValFn(k)
