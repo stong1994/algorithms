@@ -335,3 +335,415 @@ func combineOpt(n int, k int) [][]int {
 	backTrack(1)
 	return result
 }
+
+// 组合总和
+// 给你一个 无重复元素 的整数数组candidates 和一个目标整数target，找出candidates中可以使数字和为目标数target 的 所有不同组合 ，
+// 并以列表形式返回。你可以按 任意顺序 返回这些组合。
+// candidates 中的 同一个 数字可以 无限制重复被选取 。如果至少一个数字的被选数量不同，则两种组合是不同的。
+// 对于给定的输入，保证和为target 的不同组合数少于 150 个。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/combination-sum
+func combinationSum(candidates []int, target int) [][]int {
+	var (
+		result [][]int
+		path   []int
+		sum    int
+	)
+	var backTrack func(int)
+	backTrack = func(idx int) {
+		if sum > target {
+			return
+		}
+		if sum == target {
+			result = append(result, append([]int{}, path...))
+			return
+		}
+		for i := idx; i < len(candidates); i++ {
+			sum += candidates[i]
+			path = append(path, candidates[i])
+			backTrack(i)
+			path = path[:len(path)-1]
+			sum -= candidates[i]
+		}
+	}
+	backTrack(0)
+	return result
+}
+
+// 含有相同元素的组合求和
+// 给你一个由候选元素组成的集合 candidates和一个目标数target，找出candidates中所有可以使数字和为target的组合。
+// candidates 中的每个元素在每个组合中只能使用 一次 。
+// 注意：解集不能包含重复的组合。
+// 1 <= candidates.length <= 100
+// 1 <= candidates[i] <= 50
+// 1 <= target <= 30
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/combination-sum-ii
+func combinationSum2(candidates []int, target int) [][]int {
+	// 难点在于解集中不能包含重复的组合，如对target为2的candidates [2,2]，结果为{{2}}而不是{{2},{2}}
+	// 普通的回溯法做不到这一点。
+	// 可以对每个元素进行计数统计，对该数进行统计时，按照次数进行递归。这样，可以根据元素值进行occupied统计，只遍历没有被occupied的数据
+	var (
+		result    [][]int
+		path      []int
+		sum       int
+		backTrack func(int)
+		occupied  = make([]bool, 51)
+		times     = make(map[int]int)
+	)
+	sort.Ints(candidates)
+	for _, v := range candidates {
+		times[v]++
+	}
+
+	backTrack = func(idx int) {
+		if sum > target {
+			return
+		}
+		if sum == target {
+			result = append(result, append([]int{}, path...))
+			return
+		}
+		for i := idx; i < len(candidates); i++ {
+			v := candidates[i]
+			if occupied[v] {
+				continue
+			}
+			if i > 0 && candidates[i-1] == v {
+				continue
+			}
+			occupied[v] = true
+
+			for n := 1; n <= times[v]; n++ {
+				sum += v * n
+				for t := 0; t < n; t++ {
+					path = append(path, v)
+				}
+				backTrack(i + 1)
+				path = path[:len(path)-n]
+				sum -= v * n
+			}
+
+			occupied[v] = false
+		}
+
+	}
+	backTrack(0)
+	return result
+}
+
+func combinationSum2Opt(candidates []int, target int) [][]int {
+	// 难点在于组合是不可重复的。
+	// 观察可知，如果candidates是有序的，
+	// 那么 当对第startIdx个元素进行回溯时，如果第startIdx+n与第startIdx+n-1相等时，取消掉第startIdx+n的回溯 即可
+	sort.Ints(candidates)
+	var (
+		result    [][]int
+		sum       int
+		path      []int
+		backTrack func(int)
+	)
+	backTrack = func(startIdx int) {
+		if sum > target {
+			return
+		}
+		if sum == target {
+			result = append(result, append([]int{}, path...))
+			return
+		}
+		for i := startIdx; i < len(candidates); i++ {
+			if i > startIdx && candidates[i-1] == candidates[i] {
+				continue
+			}
+			sum += candidates[i]
+			path = append(path, candidates[i])
+			backTrack(i + 1)
+			path = path[:len(path)-1]
+			sum -= candidates[i]
+		}
+	}
+	backTrack(0)
+	return result
+}
+
+// 1-9 数字的组合求和
+// 找出所有相加之和为n 的k个数的组合。组合中只允许含有 1 -9 的正整数，并且每种组合中不存在重复的数字。
+// 说明：
+// 所有数字都是正整数。
+// 解集不能包含重复的组合。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/combination-sum-iii
+func combinationSum3(k int, n int) [][]int {
+	var (
+		result    [][]int
+		sum       int
+		path      []int
+		backTrack func(int)
+	)
+	backTrack = func(startIdx int) {
+		if sum == n {
+			if len(path) != k {
+				return
+			}
+			result = append(result, append([]int{}, path...))
+			return
+		}
+		if sum > n {
+			return
+		}
+		if len(path) >= k {
+			return
+		}
+		for i := startIdx; i <= 9; i++ {
+			sum += i
+			path = append(path, i)
+			backTrack(i + 1)
+			path = path[:len(path)-1]
+			sum -= i
+		}
+	}
+	backTrack(1)
+	return result
+}
+
+// 子集
+// 给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。
+// 解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。
+func subsets(nums []int) [][]int {
+	var (
+		result   = [][]int{}
+		occupied = make([]bool, len(nums))
+		path     []int
+	)
+	var backTrack func(int)
+	backTrack = func(startIdx int) {
+		result = append(result, append([]int{}, path...))
+		for i := startIdx; i < len(nums); i++ {
+			if occupied[i] {
+				continue
+			}
+			occupied[i] = true
+			path = append(path, nums[i])
+			backTrack(i + 1)
+			path = path[:len(path)-1]
+			occupied[i] = false
+
+		}
+	}
+	backTrack(0)
+	return result
+}
+
+// 含有相同元素求子集
+// 给你一个整数数组 nums ，其中可能包含重复元素，请你返回该数组所有可能的子集（幂集）。
+// 解集 不能 包含重复的子集。返回的解集中，子集可以按 任意顺序 排列。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/subsets-ii
+func subsetsWithDup(nums []int) [][]int {
+	var (
+		result    [][]int
+		path      []int
+		backTrack func(int)
+	)
+	sort.Ints(nums)
+	backTrack = func(startIdx int) {
+		result = append(result, append([]int{}, path...))
+		for i := startIdx; i < len(nums); i++ {
+			if i > startIdx && nums[i] == nums[i-1] {
+				continue
+			}
+			path = append(path, nums[i])
+			backTrack(i + 1)
+			path = path[:len(path)-1]
+		}
+	}
+	backTrack(0)
+	return result
+}
+
+// 分割字符串使得每个部分都是回文数*****
+// 给你一个字符串 s，请你将 s 分割成一些子串，使每个子串都是 回文串 。返回 s 所有可能的分割方案。
+// 回文串 是正着读和反着读都一样的字符串。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/palindrome-partitioning
+func partition(s string) [][]string {
+	var (
+		result    [][]string
+		path      []string
+		backTrack func(int)
+	)
+
+	isPalindrome := func(str string) bool {
+		i, j := 0, len(str)-1
+		for {
+			if i > j {
+				return true
+			}
+			if str[i] != str[j] {
+				return false
+			}
+			i++
+			j--
+		}
+	}
+
+	backTrack = func(startIdx int) {
+		if startIdx == len(s) {
+			result = append(result, append([]string{}, path...))
+			return
+		}
+
+		for i := startIdx + 1; i <= len(s); i++ {
+			if !isPalindrome(s[startIdx:i]) {
+				continue
+			}
+			path = append(path, s[startIdx:i])
+			backTrack(i)
+			path = path[:len(path)-1]
+		}
+	}
+	backTrack(0)
+	return result
+}
+
+// 解数独*****
+// 编写一个程序，通过填充空格来解决数独问题。
+// 数独的解法需 遵循如下规则：
+// 数字1-9在每一行只能出现一次。
+// 数字1-9在每一列只能出现一次。
+// 数字1-9在每一个以粗实线分隔的3x3宫内只能出现一次。（请参考示例图）
+// 数独部分空格内已填入了数字，空白格用'.'表示。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/sudoku-solver
+func solveSudoku(board [][]byte) {
+	// 隐藏条件：棋盘是一个9x9的网格(可以简化初始化步骤)
+	var (
+		column = [9][9]bool{}    // 每列已占有的数字
+		row    = [9][9]bool{}    // 每行已占有的数字
+		grid   = [3][3][9]bool{} // 每个9宫格已占有的数字
+		blank  [][2]int          // 空格，即'.'所在宫格
+	)
+
+	for y := 0; y < 9; y++ {
+		for x := 0; x < 9; x++ {
+			n := board[y][x]
+			if n == '.' {
+				blank = append(blank, [2]int{y, x})
+				continue
+			}
+			d := n - '1'
+			column[x][d] = true
+			row[y][d] = true
+			grid[y/3][x/3][d] = true
+		}
+	}
+
+	var backTrack func(idx int) bool
+	backTrack = func(idx int) bool {
+		if idx == len(blank) {
+			return true
+		}
+		y, x := blank[idx][0], blank[idx][1]
+		for j := 0; j <= 8; j++ {
+			if !column[x][j] && !row[y][j] && !grid[y/3][x/3][j] {
+				column[x][j] = true
+				row[y][j] = true
+				grid[y/3][x/3][j] = true
+				board[y][x] = byte(j + '1')
+
+				if backTrack(idx + 1) {
+					return true
+				}
+
+				column[x][j] = false
+				row[y][j] = false
+				grid[y/3][x/3][j] = false
+
+			}
+		}
+		return false
+	}
+	backTrack(0)
+}
+
+// N 皇后
+// n皇后问题 研究的是如何将 n个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。
+// 给你一个整数 n ，返回所有不同的n皇后问题 的解决方案。
+// 每一种解法包含一个不同的n 皇后问题 的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/n-queens
+func solveNQueens(n int) [][]string {
+	// 把皇后看成象棋中的“车”（比车厉害，因为可以斜着吃子），横竖斜可以直接吃子，
+	// 因此皇后的横竖斜不能有其他皇后，观察可知每一行和每一列都必须有皇后
+	var (
+		column = make([]bool, n)
+		//row    = make([]bool, n)
+		tmp    [][]string
+		result [][]string
+	)
+	// 初始化
+	for i := 0; i < n; i++ {
+		tmp = append(tmp, make([]string, n))
+	}
+
+	biasIsValid := func(y, x int) bool {
+		for j, i := y-1, x-1; j >= 0 && i >= 0; j, i = j-1, i-1 {
+			if tmp[j][i] == "Q" {
+				return false
+			}
+		}
+		for j, i := y+1, x+1; j < n && i < n; j, i = j+1, i+1 {
+			if tmp[j][i] == "Q" {
+				return false
+			}
+		}
+		for j, i := y+1, x-1; j < n && i >= 0; j, i = j+1, i-1 {
+			if tmp[j][i] == "Q" {
+				return false
+			}
+		}
+		for j, i := y-1, x+1; j >= 0 && i < n; j, i = j-1, i+1 {
+			if tmp[j][i] == "Q" {
+				return false
+			}
+		}
+		return true
+	}
+
+	add2Rst := func() {
+		var list []string
+		for _, v := range tmp {
+			for i, vv := range v {
+				if vv != "Q" {
+					v[i] = "."
+				}
+			}
+			list = append(list, strings.Join(v, ""))
+		}
+		result = append(result, list)
+	}
+
+	var backTrack func(int)
+	backTrack = func(idx int) {
+		if idx == n {
+			add2Rst()
+			return
+		}
+		for x := 0; x < n; x++ {
+			if column[x] {
+				continue
+			}
+			if !biasIsValid(idx, x) {
+				continue
+			}
+			column[x] = true
+			tmp[idx][x] = "Q"
+			backTrack(idx + 1)
+			tmp[idx][x] = "."
+			column[x] = false
+		}
+	}
+
+	backTrack(0)
+	return result
+}
