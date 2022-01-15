@@ -189,7 +189,6 @@ func solve(board [][]byte) {
 // m 和 n 都小于150
 //来源：力扣（LeetCode）
 //链接：https://leetcode-cn.com/problems/pacific-atlantic-water-flow
-// TODO
 func pacificAtlantic(heights [][]int) [][]int {
 	// 题中~表示太平洋，*表示大西洋。
 	// 反向思考：分别找到大平洋和大西洋能够到达的区域，再获取两者重复的坐标
