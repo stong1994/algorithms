@@ -62,6 +62,113 @@ func climbStairs_backTrack(n int) int {
 	return result
 }
 
+// 打家劫舍
+// 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+// 给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/house-robber
+func rob(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+
+	dp := make([]int, len(nums)) // dp[i] = max(dp[i-2]+ nums[i], dp[i-1])
+	max := func(a, b int) int {
+		if a > b {
+			return a
+		}
+		return b
+	}
+
+	var fib func(int) int
+	fib = func(idx int) int {
+		if dp[idx] > 0 {
+			return dp[idx]
+		}
+		if idx == 0 {
+			return nums[0]
+		}
+		if idx == 1 {
+			dp[idx] = max(nums[0], nums[1])
+			return dp[idx]
+		}
+		dp[idx] = max(fib(idx-2)+nums[idx], fib(idx-1))
+		return dp[idx]
+	}
+	return fib(len(nums) - 1)
+}
+
+func robNormal(nums []int) int {
+	max := func(a, b int) int {
+		if a > b {
+			return a
+		}
+		return b
+	}
+
+	if len(nums) == 0 {
+		return 0
+	}
+	if len(nums) == 1 {
+		return nums[0]
+	}
+
+	dp := make([]int, len(nums)) // dp[i] = max(dp[i-2]+ nums[i], dp[i-1])
+	dp[0] = nums[0]
+	dp[1] = max(nums[0], nums[1])
+
+	for i := 2; i < len(nums); i++ {
+		dp[i] = max(dp[i-2]+nums[i], dp[i-1])
+	}
+	return dp[len(nums)-1]
+}
+
+// 空间优化
+func robNormalOpt(nums []int) int {
+	max := func(a, b int) int {
+		if a > b {
+			return a
+		}
+		return b
+	}
+
+	if len(nums) == 0 {
+		return 0
+	}
+	if len(nums) == 1 {
+		return nums[0]
+	}
+
+	first := nums[0]
+	second := max(nums[0], nums[1])
+
+	for i := 2; i < len(nums); i++ {
+		first, second = second, max(first+nums[i], second)
+	}
+	return second
+}
+
+// 打家劫舍 II
+// 你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
+// 给定一个代表每个房屋存放金额的非负整数数组，计算你 在不触动警报装置的情况下 ，今晚能够偷窃到的最高金额。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/house-robber-ii
+func rob2(nums []int) int {
+	if len(nums) == 0 {
+		return 0
+	}
+	if len(nums) == 1 {
+		return nums[0]
+	}
+	// 要么有第一个元素，没最后一个元素；要么有最后一个元素，没第一个元素
+	a := robNormalOpt(nums[1:])
+	b := robNormalOpt(nums[:len(nums)-1])
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // 不同路径
 // 一个机器人位于一个 m x n网格的左上角 （起始点在下图中标记为 “Start” ）。
 // 机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
