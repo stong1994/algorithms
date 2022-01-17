@@ -49,90 +49,6 @@ func Test_climbStairs(t *testing.T) {
 	}
 }
 
-func Test_uniquePaths(t *testing.T) {
-	type args struct {
-		m int
-		n int
-	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{
-		{
-			name: "example1",
-			args: args{
-				m: 3,
-				n: 7,
-			},
-			want: 28,
-		},
-		{
-			name: "example2",
-			args: args{
-				m: 3,
-				n: 2,
-			},
-			want: 3,
-		},
-		{
-			name: "example3",
-			args: args{
-				m: 7,
-				n: 3,
-			},
-			want: 28,
-		},
-		{
-			name: "example4",
-			args: args{
-				m: 3,
-				n: 3,
-			},
-			want: 6,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := uniquePaths(tt.args.m, tt.args.n); got != tt.want {
-				t.Errorf("uniquePaths() = %v, want %v", got, tt.want)
-			}
-			if got := uniquePathsNormal(tt.args.m, tt.args.n); got != tt.want {
-				t.Errorf("uniquePathsNormal() = %v, want %v", got, tt.want)
-			}
-			if got := uniquePathsMemOpt(tt.args.m, tt.args.n); got != tt.want {
-				t.Errorf("uniquePathsMemOpt() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_minPathSum(t *testing.T) {
-	tests := []struct {
-		name string
-		grid [][]int
-		want int
-	}{
-		{
-			name: "example1",
-			grid: [][]int{{1, 3, 1}, {1, 5, 1}, {4, 2, 1}},
-			want: 7,
-		},
-		{
-			name: "example2",
-			grid: [][]int{{1, 2, 3}, {4, 5, 6}},
-			want: 12,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := minPathSum(tt.grid); got != tt.want {
-				t.Errorf("minPathSum() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_minDistance(t *testing.T) {
 	type args struct {
 		word1 string
@@ -214,6 +130,152 @@ func Test_rob2(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := rob2(tt.nums); got != tt.want {
 				t.Errorf("rob2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_numberOfArithmeticSlices(t *testing.T) {
+	tests := []struct {
+		name string
+		nums []int
+		want int
+	}{
+		{
+			name: "example0",
+			nums: []int{1},
+			want: 0,
+		},
+		{
+			name: "example1",
+			nums: []int{1, 2, 3, 4},
+			want: 3,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := numberOfArithmeticSlices(tt.nums); got != tt.want {
+				t.Errorf("numberOfArithmeticSlices() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_integerBreak(t *testing.T) {
+	tests := []struct {
+		name string
+		n    int
+		want int
+	}{
+		{
+			name: "example1",
+			n:    2,
+			want: 1,
+		},
+		{
+			name: "example2",
+			n:    10,
+			want: 36,
+		},
+		{
+			name: "example3",
+			n:    8,
+			want: 18,
+		},
+		{
+			name: "example4",
+			n:    11,
+			want: 54,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := integerBreak(tt.n); got != tt.want {
+				t.Errorf("integerBreak() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_numDecodings(t *testing.T) {
+	tests := []struct {
+		name string
+		s    string
+		want int
+	}{
+		{
+			name: "example1",
+			s:    "12",
+			want: 2,
+		},
+		{
+			name: "example2",
+			s:    "226",
+			want: 3,
+		},
+		{
+			name: "example3",
+			s:    "0",
+			want: 0,
+		},
+		{
+			name: "example4",
+			s:    "06",
+			want: 0,
+		},
+		{
+			name: "example5",
+			s:    "10",
+			want: 1,
+		},
+		{
+			name: "example6",
+			// [1]
+			// [1 1] [11]
+			// [1 1 2] [11 2] [1 12]
+			// [1 1 2 3] [11 2 3] [1 12 3] [1 1 23] [11 23]
+			s:    "1123", // [1 1 2 3] [11 2 3] [1 12 3] [1 1 23] [11 23]
+			want: 5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := numDecodings(tt.s); got != tt.want {
+				t.Errorf("numDecodings() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_lengthOfLIS(t *testing.T) {
+	tests := []struct {
+		name string
+		nums []int
+		want int
+	}{
+		{
+			name: "example1",
+			nums: []int{10, 9, 2, 5, 3, 7, 101, 18},
+			want: 4,
+		},
+		{
+			name: "example2",
+			nums: []int{0, 1, 0, 3, 2, 3},
+			want: 4,
+		},
+		{
+			name: "example3",
+			nums: []int{7, 7, 7, 7, 7, 7, 7},
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := lengthOfLIS(tt.nums); got != tt.want {
+				t.Errorf("lengthOfLIS() = %v, want %v", got, tt.want)
+			}
+			if got := lengthOfLISOpt(tt.nums); got != tt.want {
+				t.Errorf("lengthOfLISOpt() = %v, want %v", got, tt.want)
 			}
 		})
 	}

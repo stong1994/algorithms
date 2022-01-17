@@ -81,6 +81,9 @@ func Test_numSquares(t *testing.T) {
 			if got := numSquares(tt.n); got != tt.want {
 				t.Errorf("numSquares() = %v, want %v", got, tt.want)
 			}
+			if got := numSquares2(tt.n); got != tt.want {
+				t.Errorf("numSquares2() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }
