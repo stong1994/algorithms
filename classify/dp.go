@@ -1,6 +1,9 @@
 package classify
 
-import "math"
+import (
+	"math"
+	"sort"
+)
 
 // 爬楼梯
 // 假设你正在爬楼梯。需要 n 阶你才能到达楼顶。
@@ -434,17 +437,25 @@ func lengthOfLIS(nums []int) int {
 	return result
 }
 
-// 优化时间复杂度为N*log(N): 使用二分查找
+// 优化时间复杂度为N*log(N): 使用二分查找优化以下内容
+// for j := 0; j < i; j++ {
+//			if nums[i] > nums[j] {
+//				maxVal = max(maxVal, dp[j]+1)
+//			}
+//		}
+// 使用tails数组,tails[i]用来存储长度为i的子序列的最后一个元素，对于一个元素x
+// - 如果x大于tails中的元素，那么将x append 到tails的末尾，说明最长子序列的长度+1
+// - 如果tails[i-1]<x<tails[i],则将tails[i]替换为x
 func lengthOfLISOpt(nums []int) int {
-	L := len(nums)
+	var tails []int
 	binarySearch := func(val int) int {
-		lo, hi := 0, L-1
+		lo, hi := 0, len(tails)-1
 		for lo <= hi {
 			mid := lo + (hi-lo)/2
-			if nums[mid] == val {
+			if tails[mid] == val {
 				return mid
 			}
-			if nums[mid] < val {
+			if tails[mid] < val {
 				lo = mid + 1
 			} else {
 				hi = mid - 1
@@ -453,14 +464,139 @@ func lengthOfLISOpt(nums []int) int {
 		return lo
 	}
 
-	tails := make([]int, len(nums)) // TODO
-	var length int
-	for i := 0; i < len(nums); i++ {
-		index := binarySearch(nums[i])
-		tails[index] = nums[i]
-		if index == length {
-			length++
+	storeTails := func(val int) {
+		if len(tails) == 0 || val > tails[len(tails)-1] {
+			tails = append(tails, val)
+			return
+		}
+		tails[binarySearch(val)] = val
+	}
+
+	for _, num := range nums {
+		storeTails(num)
+	}
+	return len(tails)
+}
+
+// 一组整数对能够构成的最长链*****
+// 给出n个数对。在每一个数对中，第一个数字总是比第二个数字小。
+// 现在，我们定义一种跟随关系，当且仅当b < c时，数对(c, d)才可以跟在(a, b)后面。我们用这种形式来构造一个数对链。
+// 给定一个数对集合，找出能够形成的最长数对链的长度。你不需要用到所有的数对，你可以以任何顺序选择其中的一些数对来构造。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/maximum-length-of-pair-chain
+func findLongestChain(pairs [][]int) int {
+	// 对pairs根据pair[0]进行排序
+	// 遍历pairs，构造以pair结尾的最长链dp, 即dp[i]为以pairs[i]结尾的链的最大长度，对小于i的所有pair j进行比较，如果符合要求，则将j的长度+1作为i的长度
+	// 对于i>j且pairs[i][0]>pairs[j][1],那么dp[i] = max(dp[j]+1, dp[i])
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i][0] < pairs[j][0]
+	})
+	dp := make([]int, len(pairs))
+	for i := range dp {
+		dp[i] = 1
+	}
+	for i, pair := range pairs {
+		for j := 0; j < i; j++ {
+			if pair[0] > pairs[j][1] {
+				dp[i] = max(dp[j]+1, dp[i])
+			}
 		}
 	}
-	return length
+	var result int
+	for _, v := range dp {
+		if result < v {
+			result = v
+		}
+	}
+	return result
+}
+
+// 最长摆动子序列
+// 如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为 摆动序列 。第一个差（如果存在的话）可能是正数或负数。
+// 仅有一个元素或者含两个不等元素的序列也视作摆动序列。
+// 例如，[1, 7, 4, 9, 2, 5] 是一个 摆动序列 ，因为差值 (6, -3, 5, -7, 3)是正负交替出现的。
+// 相反，[1, 4, 7, 2, 5]和[1, 7, 4, 5, 5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
+// 子序列 可以通过从原始序列中删除一些（也可以不删除）元素来获得，剩下的元素保持其原始顺序。
+// 给你一个整数数组 nums ，返回 nums 中作为 摆动序列 的 最长子序列的长度 。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/wiggle-subsequence
+func wiggleMaxLength(nums []int) int {
+	// 第i个元素的最长子序列是由i之前的能够形成摆动序列的那个元素决定的，但是两个元素不一定相邻
+	// 对于i>j，如果nums[i]能够和nums[j]形成序列，那么dp[i] = dp[j]+1; 又由于0<=j<i，所以要找到dp[j]+1的最大值作为dp[i]
+	// 摆动序列存在方向，即dp[i]需要一个元素标识当前方向，令dp[i][1]表示向上（比前一个大），dp[i][0]表示向下（比前一个小）
+	dp := make([][2]int, len(nums))
+	for i := 0; i < len(nums); i++ {
+		tmp1, tmp2 := 0, 0
+		for j := 0; j < i; j++ {
+			if nums[i] > nums[j] && tmp1 < dp[j][1] {
+				tmp1 = dp[j][1]
+			}
+			if nums[i] < nums[j] && tmp2 < dp[j][0] {
+				tmp2 = dp[j][0]
+			}
+		}
+		dp[i][0] = tmp1 + 1
+		dp[i][1] = tmp2 + 1
+	}
+	var result int
+	for _, v := range dp {
+		if result < v[0] {
+			result = v[0]
+		}
+		if result < v[1] {
+			result = v[1]
+		}
+	}
+	return result
+}
+
+//  最长公共子序列
+// 给定两个字符串text1 和text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
+// 一个字符串的子序列是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+// 例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
+// 两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/longest-common-subsequence
+func longestCommonSubsequence(text1 string, text2 string) int {
+	// dp[i,j]表示以text1第i个字符和text2第j个字符的公共子序列的长度
+	// 如果text1[i]==text[j]，那么dp[i,j] = dp[i-1,j-1]+1
+	// 如果text1[i] != text2[j], 那么dp[i,j] = max(dp[i,j-1], dp[i-1, j])
+	if len(text1) == 0 || len(text2) == 0 {
+		return 0
+	}
+	if len(text1) < len(text2) {
+		text1, text2 = text2, text1
+	}
+	var dp [][]int
+	for i := 0; i < len(text1); i++ {
+		dp = append(dp, make([]int, len(text2)))
+	}
+	if text1[0] == text2[0] {
+		dp[0][0] = 1
+	}
+	for i := 1; i < len(text1); i++ {
+		if text1[i] == text2[0] {
+			dp[i][0] = 1
+		} else {
+			dp[i][0] = dp[i-1][0]
+		}
+	}
+	for i := 1; i < len(text2); i++ {
+		if text2[i] == text1[0] {
+			dp[0][i] = 1
+		} else {
+			dp[0][i] = dp[0][i-1]
+		}
+	}
+
+	for i := 1; i < len(text1); i++ {
+		for j := 1; j < len(text2); j++ {
+			if text1[i] == text2[j] {
+				dp[i][j] = dp[i-1][j-1] + 1
+				continue
+			}
+			dp[i][j] = max(dp[i][j-1], dp[i-1][j])
+		}
+	}
+	return dp[len(text1)-1][len(text2)-1]
 }
