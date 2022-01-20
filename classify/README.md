@@ -38,3 +38,7 @@
 3. 问题划分
 4. 处理特殊情况（可选）
 5. 实现
+
+## TODO
+1. 动态规划：两层循环的先后顺序，以及空闲优化后的内存循环逆序问题（change、change2）
+2. 动态规划：combinationSum4、coinChange、change之间的区别总结

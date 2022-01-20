@@ -1,6 +1,8 @@
 package classify
 
-import "math"
+import (
+	"math"
+)
 
 // 0-1 背包
 // 有一个容量为 N 的背包，要用这个背包装下物品的价值最大，这些物品有两个属性：体积 w 和价值 v。
@@ -276,4 +278,312 @@ func coinChange(coins []int, amount int) int {
 		return -1
 	}
 	return dp[amount]
+}
+
+// 找零钱的硬币数组合 ******
+// 给你一个整数数组 coins 表示不同面额的硬币，另给一个整数 amount 表示总金额。
+// 请你计算并返回可以凑成总金额的硬币组合数。如果任何硬币组合都无法凑出总金额，返回 0 。
+// 假设每一种面额的硬币有无限个。
+// 题目数据保证结果符合 32 位带符号整数。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/coin-change-2
+// 和爬楼梯问题的异同：https://leetcode-cn.com/problems/coin-change-2/solution/ling-qian-dui-huan-iihe-pa-lou-ti-wen-ti-dao-di-yo/
+func change(amount int, coins []int) int {
+	// 对于第i个硬币达到金额j的组合数，第i个硬币
+	// 	- 如果coin大于金额j，则不放，那么dp[i][j] = dp[i-1][j]
+	// 	- 否则，其组合数等于（加入coin后和为j的组合数+不加入coin和为j的组合数） 那么dp[i][j] = dp[i][j-coin] +dp[i-1][j]
+	L := len(coins)
+	dp := make([][]int, L+1)
+	for i := range dp {
+		dp[i] = make([]int, amount+1)
+	}
+	// 当没有硬币时，即i为0时，组合数为0
+	// 对总和为0的任意硬币的组合数为1
+	for i := range dp {
+		dp[i][0] = 1
+	}
+	for i := 1; i <= L; i++ {
+		coin := coins[i-1]
+		for j := 1; j <= amount; j++ {
+			if j >= coin {
+				dp[i][j] = dp[i-1][j] + dp[i][j-coin]
+			} else {
+				dp[i][j] = dp[i-1][j]
+			}
+		}
+	}
+	//fmt.Println(dp)
+	return dp[L][amount]
+}
+
+func change2(amount int, coins []int) int {
+	// coins中的硬币可以选取多次，求能够组合为总价值为amount的组合数
+	// dp[i]为能够组合为i的选取的硬币的数量
+	// - 对于i等于0时，任意coins组合为0的组合数都为1
+	// - 对于coin<=j<=amount, 组合数为其子集（i-coin）的组合之和,即 d[i]+=d[i-coin]
+	dp := make([]int, amount+1)
+	dp[0] = 1
+	for _, coin := range coins { // 重点理解 两层循环的先后顺序，以及空闲优化后的内存循环逆序问题
+		for j := coin; j <= amount; j++ {
+			dp[j] += dp[j-coin]
+		}
+	}
+	return dp[amount]
+}
+
+// 单词拆分
+// 给你一个字符串 s 和一个字符串列表 wordDict 作为字典。请你判断是否可以利用字典中出现的单词拼接出 s 。
+// 注意：不要求字典中出现的单词全部都使用，并且字典中的单词可以重复使用。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/word-break
+func wordBreak(s string, wordDict []string) bool {
+	// dp[i]: s中前i个字符串能否被拼接
+	existWord := make(map[string]bool)
+	for _, word := range wordDict {
+		existWord[word] = true
+	}
+	L := len(s)
+	dp := make([]bool, len(s)+1)
+	dp[0] = true
+	for i := 1; i <= L; i++ {
+		for j := 0; j < i; j++ {
+			if dp[j] && existWord[s[j:i]] {
+				dp[i] = true
+			}
+		}
+	}
+	return dp[L]
+}
+
+// 组合总和 Ⅳ
+// 给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。
+// 题目数据保证答案符合 32 位整数范围。
+// 请注意，顺序不同的序列被视作不同的组合。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/combination-sum-iv
+func combinationSum4(nums []int, target int) int {
+	// 子问题：在nums中找到和为i的组合数
+	// 遍历nums中的元素j，对于j<=i，有 dp[i] += dp[i-j]
+	dp := make([]int, target+1)
+	dp[0] = 1 // 对于目标为0的组合数，任意nums都只有一种组合方式
+	for i := 1; i <= target; i++ {
+		for _, num := range nums {
+			if num <= i {
+				dp[i] += dp[i-num]
+			}
+		}
+	}
+	return dp[target]
+}
+
+// 最佳买卖股票时机含冷冻期
+// 给定一个整数数组，其中第i个元素代表了第i天的股票价格 。
+// 设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:
+// 你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+// 卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown
+func maxProfit3(prices []int) int {
+	// 子问题：第i天的最大利益与前i天的最大收益有关
+	// dp[i]: 第i天的最大收益
+	// 如果第i天不买入/卖出，则第i天的最大收益等于第i-1天的最大收益
+	// 如果第i天卖出，假设第j天买入（1<=j<i）则第i天的最大收益等于第j-2天（冷冻一天）的最大收益加上第i天卖出的收益prices[i-1]-prices[j-1]
+	L := len(prices)
+	dp := make([]int, L+1)
+	dp[0] = 0
+	for i := 1; i <= L; i++ {
+		for j := 1; j < i; j++ {
+			if j >= 2 {
+				dp[i] = max(dp[i], max(dp[i-1], dp[j-2]+prices[i-1]-prices[j-1]))
+			} else {
+				dp[i] = max(dp[i], max(dp[i-1], dp[j-1]+prices[i-1]-prices[j-1]))
+			}
+		}
+	}
+	//fmt.Println(dp)
+	return dp[L]
+}
+
+func maxProfit4(prices []int) int {
+	// 子问题：第i天的最大利益与前i天的最大收益有关
+	// dp[i]: 第i天的最大收益
+	// 第i天的状态：持有股票、不持有股票、冷冻期(第i天卖出后，即第i+1天不能买入)，对应的收益分别记为dp[i][0]、dp[i][1]、dp[i][2]
+	// 如果第i天持有股票，则分为两种情况
+	//	- 前i-1天买入，此时最大收益dp[i][0] = dp[i-1][0]
+	//	- 第i天买入，此时最大收益dp[i][0] = dp[i-1][1]-prices[i-1]
+	// 如果第i天不持有股票，即处于观望期，此时最大收益为前i-1天的最大收益(分为两种状态，第i-1天不持有股票或者冷冻期)
+	//		dp[i][1] = max(dp[i-1][1], dp[i-1][2])
+	// 如果第i天处于冷冻期，此时卖出了前i-1天持有的股票 最大收益等于dp[i][2]= dp[i-1][0] + prices[i-1]
+	if len(prices) == 0 {
+		return 0
+	}
+	L := len(prices)
+	dp := make([][3]int, L+1)
+	dp[1][0] = -prices[0]
+	dp[1][1] = 0
+	dp[1][2] = 0
+	for i := 2; i <= L; i++ {
+		dp[i][0] = max(dp[i-1][0], dp[i-1][1]-prices[i-1])
+		dp[i][1] = max(dp[i-1][1], dp[i-1][2])
+		dp[i][2] = dp[i-1][0] + prices[i-1]
+	}
+
+	//fmt.Println(dp)
+	return max(dp[L][1], dp[L][2])
+}
+
+// 需要交易费用的股票交易
+// 给定一个整数数组prices，其中第i个元素代表了第i天的股票价格 ；整数fee 代表了交易股票的手续费用。
+// 你可以无限次地完成交易，但是你每笔交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。
+// 返回获得利润的最大值。
+// 注意：这里的一笔交易指买入持有并卖出股票的整个过程，每笔交易你只需要为支付一次手续费。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee
+func maxProfit5(prices []int, fee int) int {
+	// 子问题：第i天的最大收益取决于前i-1天的最大收益
+	// 两种状态：持有和未持有=》dp[i][1]、dp[i][0]
+	// 如果第i天持有，分为两种：
+	//	- 如果是第i天买入，那么其最大收益取决于第i-1天的未持有的收益-买入价格， 则dp[i][1] = dp[i-1][0] - prices[i-1]
+	//	- 如果是前i-1天买入，那么其最大收益取决于第i-1天的已持有的收益， 则dp[i][1] = dp[i-1][1]
+	// 如果第i天不持有，分为两种情况：
+	// 	- 第i天卖出，那么最大收益为第i-1天持有的收益加上当天的价格再减去手续费,则dp[i][0] = dp[i-1][1]+prices[i-1]-fee
+	// 	- 第i-1天已经未持有，那么最大收益与第i-1天相等，即dp[i][0] = dp[i-1][0]
+	if len(prices) == 0 {
+		return 0
+	}
+	L := len(prices)
+	dp := make([][2]int, L+1)
+	dp[1][0] = 0
+	dp[1][1] = -prices[0]
+	for i := 2; i <= L; i++ {
+		dp[i][1] = max(dp[i-1][0]-prices[i-1], dp[i-1][1])
+		dp[i][0] = max(dp[i-1][1]+prices[i-1]-fee, dp[i-1][0])
+	}
+	//fmt.Println(dp)
+	return dp[L][0]
+}
+
+// 买卖股票的最佳时机 III
+// 给定一个数组，它的第 i 个元素是一支给定的股票在第 i 天的价格。
+// 设计一个算法来计算你所能获取的最大利润。你最多可以完成两笔交易。
+// 注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iii
+func maxProfit6(prices []int) int {
+	// 与其他题目的区别在于限制了交易次数：最多两笔
+	// 题目简化为：将prices划分最多两个区间，使得两个区间的最大值和最小值之差 相加最大
+	// 对于分割索引i，0<=i<len(prices)
+	var result int
+	for i := 0; i < len(prices); i++ {
+		diff := maxDiff(prices, 0, i) + maxDiff(prices, i+1, len(prices)-1)
+		if diff > result {
+			result = diff
+		}
+	}
+	return result
+}
+
+func maxDiff(prices []int, start, end int) int {
+	if start == end || start >= len(prices) {
+		return 0
+	}
+	var (
+		result  int
+		tmpHigh = prices[start]
+		tmpMin  = prices[start]
+	)
+	for i := start + 1; i <= end; i++ {
+		if prices[i] >= tmpHigh {
+			tmpHigh = prices[i]
+		}
+		if prices[i] < tmpMin {
+			if result < tmpHigh-tmpMin {
+				result = tmpHigh - tmpMin
+			}
+			tmpMin = prices[i]
+			tmpHigh = prices[i]
+		}
+	}
+	if result < tmpHigh-tmpMin {
+		result = tmpHigh - tmpMin
+	}
+	return result
+}
+
+// 上述方法超时，使用动态规划
+func maxProfit6Opt(prices []int) int {
+	// 与其他题目的区别在于限制了交易次数：最多两笔
+	// 子问题：第i次交易的最大收益取决于前i-1次交易
+	// 5个状态：
+	//	- 没有进行交易,没有持有股票 dp[i][0]
+	//	- 没有进行交易，但持有股票 dp[i][1]
+	//	- 进行第一次交易，没有持有股票（这次卖掉了股票） dp[i][2]
+	//	- 进行第一次交易，有持有股票（之前卖掉了股票，此时又买入了股票） dp[i][3]
+	//	- 进行了第二次交易，没有持有股票（第二次卖掉了股票） dp[i][4]
+
+	// - 如果第i次交易之前没有进行交易，没有持有股票，则dp[i][0] = 0
+	// - 如果第i次交易之前没有进行交易，但持有股票，则dp[i][1] = max(-prices[i-1], dp[i-1][1])
+	// - 如果第i次交易进行了第一次交易，卖掉了股票，则dp[i][2] = max(dp[i-1][1] + prices[i-1], dp[i-1][2])
+	// - 如果第i次之前进行了交易，此时持有股票 dp[i][3] = max(dp[i-1][2] - prices[i-1], dp[i-1][3])
+	// - 如果第i次之前进行了第二次卖掉股票 dp[i][4] = max(dp[i-1][3] + prices[i-1], dp[i-1][4])
+	L := len(prices)
+	if L == 0 {
+		return 0
+	}
+	dp := make([][5]int, L+1)
+	dp[1][0] = 0
+	dp[1][1] = -prices[0]
+	dp[1][2] = 0
+	dp[1][3] = -prices[0] // 假设一天能够进行重复交易，此时为买入第二笔
+	dp[1][4] = 0
+	for i := 2; i <= L; i++ {
+		dp[i][0] = 0
+		dp[i][1] = max(-prices[i-1], dp[i-1][1])
+		dp[i][2] = max(dp[i-1][1]+prices[i-1], dp[i-1][2])
+		dp[i][3] = max(dp[i-1][2]-prices[i-1], dp[i-1][3])
+		dp[i][4] = max(dp[i-1][3]+prices[i-1], dp[i-1][4])
+	}
+	//fmt.Println(dp)
+	return max(dp[L][2], dp[L][4])
+}
+
+// 买卖股票的最佳时机 IV
+// 给定一个整数数组prices ，它的第 i 个元素prices[i] 是一支给定的股票在第 i 天的价格。
+// 设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。
+// 注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv
+func maxProfit7(k int, prices []int) int {
+	// 上题为k=2，有五种状态：未进行买、第一次买、第一次卖、第二次买、第二次卖
+	//  如果允许进行k笔交易，则有2k+1种状态
+	L := len(prices)
+	if L == 0 {
+		return 0
+	}
+	dp := make([][]int, L+1)
+	for i := range dp {
+		dp[i] = make([]int, 2*k+1)
+	}
+	// 初始化第一天的状态：买的收益为-prices[0]
+	for i := 1; i < 2*k+1; i += 2 {
+		dp[1][i] = -prices[0]
+	}
+	for i := 2; i <= L; i++ {
+		for j := 1; j < 2*k+1; j++ { // 状态为0时，表示未买入，收益永远为0，不用考虑
+			if j&1 == 1 { // 买操作
+				dp[i][j] = max(dp[i-1][j-1]-prices[i-1], dp[i-1][j])
+			} else { // 卖操作
+				dp[i][j] = max(dp[i-1][j-1]+prices[i-1], dp[i-1][j])
+			}
+		}
+
+	}
+	//fmt.Println(dp)
+	var result int
+	for i := 2; i < 2*k+1; i += 2 {
+		if result < dp[L][i] {
+			result = dp[L][i]
+		}
+	}
+	return result
 }
