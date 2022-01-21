@@ -174,56 +174,6 @@ func rob2(nums []int) int {
 	return b
 }
 
-// 编辑距离
-// 给你两个单词word1 和word2，请你计算出将word1转换成word2 所使用的最少操作数。
-// 你可以对一个单词进行如下三种操作：
-// 插入一个字符
-// 删除一个字符
-// 替换一个字符
-// 来源：力扣（LeetCode）
-// 链接：https://leetcode-cn.com/problems/edit-distance
-func minDistance(word1 string, word2 string) int {
-	min := func(a, b, c int) int {
-		m := a
-		if m > b {
-			m = b
-		}
-		if m > c {
-			m = c
-		}
-		return m
-	}
-
-	var dp [][]int // dp[i][j]表示word1中长度为i的字串变成word2中长度为j的字串需要的操作数
-	for i := 0; i <= len(word1); i++ {
-		dp = append(dp, make([]int, len(word2)+1))
-	}
-	for i := 1; i <= len(word1); i++ {
-		// 长度为0的word2转换为长度为i的word1，只能插入或删除i次
-		dp[i][0] = i
-	}
-	for j := 1; j <= len(word2); j++ {
-		// 长度为0的word1转换为长度为j的word2，只能插入或者删除j次
-		dp[0][j] = j
-	}
-
-	for i := 1; i <= len(word1); i++ {
-		for j := 1; j <= len(word2); j++ {
-			// 如果word1[i]与word2[j]相等，那么不需要任何操作，即dp[i][j] = dp[i-1][j-1]
-			// 如果不等，则要进行三种操作：
-			// - word1替换一个字符，即 dp[i][j] = dp[i-1][j-1] + 1
-			// - word1插入一个字符，即 dp[i][j] = dp[i][j-1] + 1
-			// - word1删除一个字符，即 dp[i][j] = dp[i-1][j] + 1
-			if word1[i-1] == word2[j-1] { // 长度为i的word1所在的字符的索引为i-1
-				dp[i][j] = dp[i-1][j-1]
-			} else {
-				dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1
-			}
-		}
-	}
-	return dp[len(word1)][len(word2)]
-}
-
 // 信件错排
 // 题目描述：有N个信和信封，它们被打乱，求错误装信方式的数量。
 func envelopeFalse(n int) int {
@@ -599,4 +549,125 @@ func longestCommonSubsequence(text1 string, text2 string) int {
 		}
 	}
 	return dp[len(text1)-1][len(text2)-1]
+}
+
+// 删除两个字符串的字符使它们相等
+// 给定两个单词word1和word2，找到使得word1和word2相同所需的最小步数，每步可以删除任意一个字符串中的一个字符。
+// 提示：
+//	给定单词的长度不超过500。
+//	给定单词中的字符只含有小写字母。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/delete-operation-for-two-strings
+func minDistance2(word1 string, word2 string) int {
+	// 简化问题：删除两个字符串的字符使他们相等=》找到两个字符串的最大公共字串
+	// 子问题：dp[i][j]对于字符串word1的前i个字符中，在word2前j个字符匹配的个数
+	// 如果word1[i]等于word2[j]，则添加第j个字符，
+	//		此时最大公共字串的个数为word1前i-1个字符匹配word2前j-1个字符的最大个数。那么dp[i][j]=dp[i-1][j-1]+1
+	// 如果word1[i]不等于word2[j]，则不能添加第j个字符，此时最大公共字串的个数为word1的前i个字符匹配word2前j-1个字符的最大个数 或者
+	//		word1前i-1个字符匹配word2前j个字符的最大个数，那么dp[i][j]=max(dp[i][j-1], dp[i-1][j])
+	L1, L2 := len(word1), len(word2)
+	dp := make([][]int, L1+1)
+	for i := range dp {
+		dp[i] = make([]int, L2+1)
+	}
+	for i := 1; i <= L1; i++ {
+		for j := 1; j <= L2; j++ {
+			if word1[i-1] == word2[j-1] {
+				dp[i][j] = dp[i-1][j-1] + 1
+			} else {
+				dp[i][j] = max(dp[i][j-1], dp[i-1][j])
+			}
+		}
+	}
+	//for _, v := range dp {
+	//	fmt.Println(v)
+	//}
+	return L1 + L2 - dp[L1][L2] - dp[L1][L2]
+}
+
+// 编辑距离
+// 给你两个单词word1 和word2，请你计算出将word1转换成word2 所使用的最少操作数。
+// 你可以对一个单词进行如下三种操作：
+// 插入一个字符
+// 删除一个字符
+// 替换一个字符
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/edit-distance
+func minDistance(word1 string, word2 string) int {
+	// 子问题：word1前i个字符转换为word2前j个字符与之前的字符串有关
+	// dp[i][j]: 对于word1前i个字符转换为word2前j个字符所使用的的最少操作数
+	// 如果word1[i]==word2[j]，那么无需做转换操作, 即dp[i][j] = dp[i-1][j-1]
+	// 如果word1[i]!=word2[j]
+	// - 如果需要向word1插入字符：此时的操作数为前i个word1字符转换为前j-1个word2字符所需操作数+1 // abc => abcd
+	// 		即 dp[i][j] = dp[i][j-1]+1
+	// - 如果需要向word1删除字符：此时的操作数为前i-1个word1字符转换为前j个word2字符所需操作数+1 // abcd => abc
+	// 		即 dp[i][j] = dp[i-1][j]+1
+	// - 如果需要向word1替换字符：此时的操作数为前i-1个word1字符转换为前j-1个word2字符所需操作数+1 // abc => abd
+	// 		即 dp[i][j] = dp[i-1][j-1]+1
+	L1, L2 := len(word1), len(word2)
+	dp := make([][]int, L1+1)
+	// 初始化
+	for i := range dp {
+		dp[i] = make([]int, L2+1)
+	}
+	// 处理边界 i=0和j=0
+	for i := 0; i <= L1; i++ {
+		dp[i][0] = i // j为0时，word1转换为空字符串，都为删除操作
+	}
+	for i := 0; i <= L2; i++ {
+		dp[0][i] = i // 当空字符串转换为word2时，都为插入操作
+	}
+	for i := 1; i <= L1; i++ { // word1转换为word2和word2转换为word1是相同的，所以两层循环的先后顺序可以互换
+		for j := 1; j <= L2; j++ {
+			if word1[i-1] != word2[j-1] { // i,j为word1和word2的索引，要减1
+				dp[i][j] = min(dp[i][j-1]+1, min(dp[i-1][j]+1, dp[i-1][j-1]+1))
+			} else {
+				dp[i][j] = dp[i-1][j-1]
+			}
+		}
+	}
+	return dp[L1][L2]
+}
+
+// 复制粘贴字符
+// 最初记事本上只有一个字符 'A' 。你每次可以对这个记事本进行两种操作：
+// Copy All（复制全部）：复制这个记事本中的所有字符（不允许仅复制部分字符）。
+// Paste（粘贴）：粘贴 上一次 复制的字符。
+// 给你一个数字n ，你需要使用最少的操作次数，在记事本上输出 恰好n个 'A' 。返回能够打印出n个 'A' 的最少操作次数。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/2-keys-keyboard
+func minSteps(n int) int {
+	// 输出i个字符，找到整除数j，然后获取到获得j个字符的操作数dp[j]，然后进行复制-粘贴(粘贴次数为i/j-1),即dp[i] = dp[j] + i/j
+	dp := make([]int, n+1)
+	for i := 2; i <= n; i++ {
+		dp[i] = math.MaxInt32
+		for j := 1; j*j <= i; j++ {
+			if i%j == 0 {
+				dp[i] = min(dp[i], dp[j]+i/j)
+				dp[i] = min(dp[i], dp[i/j]+j)
+			}
+		}
+	}
+	return dp[n]
+}
+
+func minSteps2(n int) int {
+	// 质数分解
+	// 复制-粘贴过程就是一个不断相乘的过程，即n=a*b*c*d...
+	// 对于任意的数i，如果其为素数，那么无法继续进行拆分；如果为合数，那么对于任意一种拆分成两个大于1的整数的方式
+	//	i = j1 *j2
+	// 复制-粘贴的过程是相乘的过程，而代价最大为j1*j2，最小为j1+j2
+	// 在数字大于1时，j1+j2<=j1*j2
+	// 因此找到几个整数相乘等于n的过程中，最小代价找到素数之积为n，素数之和即为最小代价
+	var result int
+	for i := 2; i*i <= n; i++ {
+		for n%i == 0 {
+			n /= i
+			result += i
+		}
+	}
+	if n > 1 { // 最后剩余的素数
+		result += n
+	}
+	return result
 }

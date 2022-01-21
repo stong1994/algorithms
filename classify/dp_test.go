@@ -399,3 +399,88 @@ func Test_longestCommonSubsequence(t *testing.T) {
 		})
 	}
 }
+
+func Test_minDistance2(t *testing.T) {
+	type args struct {
+		word1 string
+		word2 string
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "example1",
+			args: args{
+				word1: "sea",
+				word2: "eat",
+			},
+			want: 2,
+		},
+		{
+			name: "example2",
+			args: args{
+				word1: "leetcode",
+				word2: "etco",
+			},
+			want: 4,
+		}, {
+			name: "example3",
+			args: args{
+				word1: "mart",
+				word2: "karma",
+			},
+			want: 5,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := minDistance2(tt.args.word1, tt.args.word2); got != tt.want {
+				t.Errorf("minDistance2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_minSteps(t *testing.T) {
+	type args struct {
+		n int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "example1",
+			args: args{n: 3},
+			want: 3,
+		},
+		{
+			name: "example2",
+			args: args{n: 1},
+			want: 0,
+		},
+		{
+			name: "example3",
+			args: args{n: 17},
+			want: 17,
+		},
+		{
+			name: "example4",
+			args: args{n: 12},
+			want: 7,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := minSteps(tt.args.n); got != tt.want {
+				t.Errorf("minSteps() = %v, want %v", got, tt.want)
+			}
+			if got := minSteps2(tt.args.n); got != tt.want {
+				t.Errorf("minSteps2() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
