@@ -1,4 +1,4 @@
-package classify
+package dp
 
 import (
 	"math"

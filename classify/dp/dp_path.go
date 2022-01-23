@@ -1,4 +1,4 @@
-package classify
+package dp
 
 // 动态规划-矩阵路径问题
 // 最小路径和

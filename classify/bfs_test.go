@@ -1,6 +1,8 @@
 package classify
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_shortestPathBinaryMatrix(t *testing.T) {
 	tests := []struct {
@@ -80,9 +82,6 @@ func Test_numSquares(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := numSquares(tt.n); got != tt.want {
 				t.Errorf("numSquares() = %v, want %v", got, tt.want)
-			}
-			if got := numSquares2(tt.n); got != tt.want {
-				t.Errorf("numSquares2() = %v, want %v", got, tt.want)
 			}
 		})
 	}

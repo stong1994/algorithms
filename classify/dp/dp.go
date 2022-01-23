@@ -1,4 +1,4 @@
-package classify
+package dp
 
 import (
 	"math"
@@ -669,5 +669,59 @@ func minSteps2(n int) int {
 	if n > 1 { // 最后剩余的素数
 		result += n
 	}
+	return result
+}
+
+// 最长有效括号
+// 给你一个只包含 '('和 ')'的字符串，找出最长有效（格式正确且连续）括号子串的长度。
+//示例 1：
+// 	输入：s = ")()())"
+//	输出：4
+//	解释：最长有效括号子串是 "()()"
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/longest-valid-parentheses
+func longestValidParentheses(s string) int {
+	// 对于一个字符串中的括号，左括号的数量不能比右括号的数量少，否则就要舍弃多余的左括号。
+	// 所以问题可以转换：在目标字符串中str中，左括号和右括号的数量相等，并且对于任意前i个字符中，左括号要不少于右括号
+	// 令dp[i][3] 为字符串s中前i个字符中左括号(dp[i][0])和右括号(dp[i][1])的数量,和有效括号的数量(dp[i][2])
+	// - 如果第i-1个字符中左括号的数量大于右括号，那么对于第i个字符，
+	//		- 如果为左括号，将第i个字符的左括号的数量+1，即
+	//			dp[i][0] = dp[i-1][0]+1
+	//			dp[i][1] = dp[i-1][1]
+	//			此时有效括号的数量没有增加 dp[i][2] = 0
+	//		- 如果为右括号，将第i个字符的右括号的数量+1，即
+	//			dp[i][0] = dp[i-1][0]
+	//			dp[i][1] = dp[i-1][1]+1
+	//			此时有效括号的数量增加，其计算方式为dp[i-1]+1
+	// - 如果第i-1个字符中左括号的数量等于右括号，那么对于第i个字符，
+	// 		- 如果为左括号，将第i个字符的左括号的数量+1，即
+	//			dp[i][0] = dp[i-1][0]+1
+	//			dp[i][1] = dp[i-1][1]
+	//		- 如果为右括号，则不能将第i个字符的长度计入。从i+1个字符重新开始计算，并将dp[i][0]比较-标记为临时最大值
+	var (
+		result int
+		dp     = make([][2]int, len(s)+1)
+	)
+	for i := 1; i < len(s)+1; i++ {
+		if dp[i-1][0] > dp[i-1][1] {
+			if s[i-1] == '(' {
+				dp[i][0] = dp[i-1][0] + 1
+				dp[i][1] = dp[i-1][1]
+			} else {
+				dp[i][0] = dp[i-1][0]
+				dp[i][1] = dp[i-1][1] + 1
+			}
+			continue
+		}
+		if dp[i-1][0] == dp[i-1][1] {
+			if s[i-1] == '(' {
+				dp[i][0] = dp[i-1][0] + 1
+				dp[i][1] = dp[i-1][1]
+			} else {
+				result = max(result, dp[i-1][0])
+			}
+		}
+	}
+	result = max(result*2, dp[len(s)][1]*2)
 	return result
 }
