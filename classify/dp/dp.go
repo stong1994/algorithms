@@ -725,3 +725,21 @@ func longestValidParentheses(s string) int {
 	result = max(result*2, dp[len(s)][1]*2)
 	return result
 }
+
+// 切割钢条
+// 不同长度的钢条的价格不同，给出价格表，求如何切割，找到最大收益
+func splitSteel(prices, lengths []int, n int) int {
+	// dp[i]: 长度为i时的最大的收益
+	// 对于长度为i的钢条，遍历小于等于其长度的lengths，那么其最大收益为max(dp[i-lengths[0]+prices[0] ...])
+	dp := make([]int, n+1)
+	dp[0] = 0
+	for i := 1; i <= n; i++ {
+		for j, length := range lengths {
+			if length > i {
+				continue
+			}
+			dp[i] = max(dp[i], dp[i-length]+prices[j])
+		}
+	}
+	return dp[n]
+}

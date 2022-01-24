@@ -523,3 +523,51 @@ func Test_longestValidParentheses(t *testing.T) {
 		})
 	}
 }
+
+func Test_splitSteel(t *testing.T) {
+	type args struct {
+		prices  []int
+		lengths []int
+		n       int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "example1",
+			args: args{
+				prices:  []int{1, 5, 8, 9, 10, 17, 17, 20, 24, 30},
+				lengths: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+				n:       4,
+			},
+			want: 10,
+		},
+		{
+			name: "example2",
+			args: args{
+				prices:  []int{1, 5, 8, 9, 10, 17, 17, 20, 24, 30},
+				lengths: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+				n:       6,
+			},
+			want: 17,
+		},
+		{
+			name: "example3",
+			args: args{
+				prices:  []int{1, 5, 8, 9, 10, 17, 17, 20, 24, 30},
+				lengths: []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+				n:       9,
+			},
+			want: 25,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := splitSteel(tt.args.prices, tt.args.lengths, tt.args.n); got != tt.want {
+				t.Errorf("splitSteel() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
