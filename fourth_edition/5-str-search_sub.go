@@ -7,7 +7,7 @@ package fourth_edition
 func violentSearchSubStr(txt, pat string) int {
 	M := len(txt)
 	N := len(pat)
-	for i := 0; i <= M-N; i++{ // 对于特殊情况txt和pat为空，此时i为0，M-N也为0，因此会进入循环，且返回为0
+	for i := 0; i <= M-N; i++ { // 对于特殊情况txt和pat为空，此时i为0，M-N也为0，因此会进入循环，且返回为0
 		var j int
 		for j = 0; j < N; j++ {
 			if txt[i+j] != pat[j] {
@@ -24,21 +24,21 @@ func violentSearchSubStr(txt, pat string) int {
 // 另一种形式的暴力破解：显式回退
 func violentSearchSubStr2(txt, pat string) int {
 	var (
-		M = len(txt)
-		N = len(pat)
+		M    = len(txt)
+		N    = len(pat)
 		i, j = 0, 0
 	)
 
-	for ; i < M && j<N; i++ {
+	for ; i < M && j < N; i++ {
 		if txt[i] == pat[j] {
 			j++
 			continue
 		}
-		i -=j
+		i -= j
 		j = 0
 	}
 	if j == N {
-		return i-N
+		return i - N
 	}
 	return -1
 }
@@ -48,17 +48,17 @@ func violentSearchSubStr2(txt, pat string) int {
 // TODO 有限状态机？
 func searchSubStrKMP(txt, pat string) int {
 	var (
-		M = len(txt)
-		N = len(pat)
+		M    = len(txt)
+		N    = len(pat)
 		i, j = 0, 0
 	)
 
 	dfa := searchSubStrKMPMakeDFA(pat)
-	for ; i < M && j<N; i++ {
+	for ; i < M && j < N; i++ {
 		j = dfa[txt[i]][j]
 	}
 	if j == N {
-		return i-N
+		return i - N
 	}
 	return -1
 }
@@ -70,20 +70,21 @@ func searchSubStrKMP(txt, pat string) int {
 func searchSubStrKMPMakeDFA(pat string) [][]int {
 	M := len(pat)
 	R := 256
-	dfa := make([][]int, R)
+	dfa := make([][]int, R) // 竖列为256个基础元素、横列为目标字符串的元素
 	for i := range dfa {
 		dfa[i] = make([]int, M)
 	}
 	dfa[pat[0]][0] = 1
-	//		匹配失败时：将dfa[][X]复制到dfs[][j]
+	//		匹配失败时：将dfa[][X]复制到dfa[][j]
 	// 		匹配成功时：将dfa[j][j]设置为j+1
 	//      更新X
-	for X,j := 0,1; j< M;j++ {
-		for c := 0; c<R; c++ {
+	var X = 0
+	for j := 1; j < M; j++ {
+		for c := 0; c < R; c++ {
 			dfa[c][j] = dfa[c][X] // 对于每个字符元素的子数组（dfa[c]），
-									// 其对应的模式串字母对应的值为”重启位置“，即上一个该字符对应的位置
+			// 其对应的模式串字母对应的值为”重启位置“，即上一个该字符对应的位置
 		}
-		dfa[pat[j]][j] = j+1
+		dfa[pat[j]][j] = j + 1
 		X = dfa[pat[j]][X]
 	}
 	return dfa
@@ -97,20 +98,20 @@ func searchSubStrBM(txt, pat string) int {
 	R := 256
 	// 初始化right数组，构建一个记录了pat中每个元素在pat中最右的位置
 	right := make([]int, R)
-	for c := 0; c <R; c++ {
+	for c := 0; c < R; c++ {
 		right[c] = -1
 	}
-	for j:=0; j<M; j++ {
-		right[pat[j]]=j
+	for j := 0; j < M; j++ {
+		right[pat[j]] = j
 	}
 
 	var skip int
-	for i := 0; i <=N-M; i+=skip {
+	for i := 0; i <= N-M; i += skip {
 		skip = 0
 		// 从右往左扫描，一旦匹配失败，则跳跃到文本中的字符和它在模式串中出现的最右位置对齐
-		for j := M-1; j>=0; j-- {
+		for j := M - 1; j >= 0; j-- {
 			if pat[j] != txt[i+j] {
-				skip = j-right[txt[i+j]]
+				skip = j - right[txt[i+j]]
 				if skip < 1 {
 					skip = 1
 				}
@@ -127,20 +128,20 @@ func searchSubStrBM(txt, pat string) int {
 // Rabin-Karp指纹字符串查找算法
 // 基于hash的思想来比较子字符串，传统上的算法很慢，通过一些数学性质能够加快hash计算的速度，以此来加快查找
 type RabinKarp struct {
-	R int // 字母表的大小 256
-	Q int // 一个很大的素数 暂定为3571
-	pat string
-	M int // 模式字符串的长度
-	RM int // R^(M-1)%Q
+	R       int // 字母表的大小 256
+	Q       int // 一个很大的素数 暂定为3571
+	pat     string
+	M       int // 模式字符串的长度
+	RM      int // R^(M-1)%Q
 	patHash int
 }
 
 func NewRabinKarp(pat string) *RabinKarp {
 	rk := &RabinKarp{
-		R:       256,
-		Q:       3571,
-		pat:     pat,
-		M:       len(pat),
+		R:   256,
+		Q:   3571,
+		pat: pat,
+		M:   len(pat),
 	}
 	rk.initPatHash()
 	return rk
@@ -156,11 +157,11 @@ func (rk RabinKarp) search(txt string) int {
 		return 0
 	}
 	for i := rk.M; i < N; i++ {
-		txtHash = (txtHash+rk.Q-rk.RM*int(txt[i-rk.M]) %rk.Q)%rk.Q
-		txtHash = (txtHash*rk.R+int(txt[i]))%rk.Q
+		txtHash = (txtHash + rk.Q - rk.RM*int(txt[i-rk.M])%rk.Q) % rk.Q
+		txtHash = (txtHash*rk.R + int(txt[i])) % rk.Q
 		if rk.patHash == txtHash {
-			if rk.check(i-rk.M+1) {
-				return i-rk.M+1
+			if rk.check(i - rk.M + 1) {
+				return i - rk.M + 1
 			}
 		}
 	}
@@ -170,20 +171,73 @@ func (rk RabinKarp) search(txt string) int {
 func (rk *RabinKarp) initPatHash() {
 	RM := 1
 	for i := 1; i <= rk.M-1; i++ {
-		RM = (rk.R*RM) %rk.Q
+		RM = (rk.R * RM) % rk.Q
 	}
 	rk.patHash = rk.hash(rk.pat, rk.M)
 	rk.RM = RM
 }
 
-func (rk RabinKarp)hash(key string, M int) int {
+func (rk RabinKarp) hash(key string, M int) int {
 	h := 0
-	for j := 0; j<M; j++ {
-		h = (rk.R*h+int(key[j])) %rk.Q
+	for j := 0; j < M; j++ {
+		h = (rk.R*h + int(key[j])) % rk.Q
 	}
 	return h
 }
 
 func (rk RabinKarp) check(i int) bool {
 	return true
+}
+
+func pmt(str string) []int {
+	result := make([]int, len(str))
+	// 第一个元素的匹配长度为0
+	result[0] = 0
+	for i := 1; i < len(str); i++ {
+		lastLen := result[i-1]
+		if str[lastLen] == str[i] {
+			result[i] = lastLen + 1
+		} else if str[i] == str[0] {
+			result[i] = 1
+		} else {
+			result[i] = 0
+		}
+	}
+	return result
+}
+
+func next(str string) []int {
+	result := make([]int, len(str))
+	result[0] = -1
+	i, j := 0, -1
+	for i < len(str)-1 {
+		if j == -1 || str[i] == str[j] {
+			i++
+			j++
+			result[i] = j
+		} else {
+			j = result[j] // 为什么是result[j]而不是-1，对于str中的第i个元素，
+			// 其前缀长度最大是result[i-1]+1,其次是result[result[i-1]]+1（已知str[i-1]与str[0]相等，
+			// 设最大长度为n，则str[i-1-n]与str[n]相等，此时result[i-1]=n）,以此类推
+			//
+		}
+	}
+	return result
+}
+
+func kmp(target, pat string) int {
+	nexts := next(pat)
+	i, j := 0, 0
+	for i < len(target) && j < len(pat) {
+		if j == -1 || target[i] == pat[j] {
+			i++
+			j++
+			continue
+		}
+		j = nexts[j]
+	}
+	if j == len(pat) {
+		return i - j
+	}
+	return -1
 }

@@ -63,6 +63,9 @@ func Test_violentSearchSubStr(t *testing.T) {
 			if got := rk.search(tt.args.txt); got != tt.want {
 				t.Errorf("RabinKarp() = %v, want %v", got, tt.want)
 			}
+			if got := kmp(tt.args.txt, tt.args.pat); got != tt.want {
+				t.Errorf("kmp() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

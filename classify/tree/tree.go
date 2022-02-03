@@ -1,5 +1,7 @@
 package tree
 
+import "math"
+
 type TreeNode struct {
 	Val   int
 	Left  *TreeNode
@@ -220,4 +222,63 @@ func isSame(node1, node2 *TreeNode) bool {
 		return false
 	}
 	return isSame(node1.Left, node2.Left) && isSame(node1.Right, node2.Right)
+}
+
+// 方法二：可转化为“判断是否是子串”，用KMP实现。根据题意，“子序列”需要保证subRoot的子节点为null时，
+// root对应的子节点也要为null，因此，对于为空的子节点要用null来填充
+func isSubtree_KMP(root *TreeNode, subRoot *TreeNode) bool {
+	var list1, list2 []int
+	rootList := tree2list(root, list1)
+	subList := tree2list(subRoot, list2)
+	return kmp(rootList, subList)
+}
+
+func kmp(a, b []int) bool {
+	// 构建next数组(由pmt数组优化得)
+	next := makeNext(b)
+	i, j := 0, 0
+	for i < len(a) && j < len(b) {
+		if j == -1 || a[i] == b[j] {
+			i++
+			j++
+			continue
+		}
+		j = next[j]
+	}
+	return j == len(b)
+}
+
+func makeNext(data []int) []int {
+	result := make([]int, len(data))
+	result[0] = -1
+	cur, pat := 0, -1
+	for cur < len(data)-1 {
+		if pat == -1 || data[cur] == data[pat] {
+			cur++
+			pat++
+			result[cur] = pat
+		} else {
+			pat = result[pat]
+		}
+	}
+	return result
+}
+
+// 采用中序遍历构建list，左右空节点应用不同的值标识
+func tree2list(tree *TreeNode, list []int) []int {
+	if tree == nil {
+		return list
+	}
+	list = append(list, tree.Val)
+	if tree.Left != nil {
+		list = tree2list(tree.Left, list)
+	} else {
+		list = append(list, math.MinInt32-1)
+	}
+	if tree.Right != nil {
+		list = tree2list(tree.Right, list)
+	} else {
+		list = append(list, math.MinInt32-2)
+	}
+	return list
 }
