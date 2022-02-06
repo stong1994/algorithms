@@ -189,23 +189,6 @@ func (rk RabinKarp) check(i int) bool {
 	return true
 }
 
-func pmt(str string) []int {
-	result := make([]int, len(str))
-	// 第一个元素的匹配长度为0
-	result[0] = 0
-	for i := 1; i < len(str); i++ {
-		lastLen := result[i-1]
-		if str[lastLen] == str[i] {
-			result[i] = lastLen + 1
-		} else if str[i] == str[0] {
-			result[i] = 1
-		} else {
-			result[i] = 0
-		}
-	}
-	return result
-}
-
 func next(str string) []int {
 	result := make([]int, len(str))
 	result[0] = -1
