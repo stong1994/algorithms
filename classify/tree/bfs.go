@@ -2,6 +2,7 @@ package tree
 
 // 二叉树的层平均值
 // 给定一个非空二叉树的根节点 root , 以数组的形式返回每一层节点的平均值。与实际答案相差 10^-5 以内的答案可以被接受
+// https://leetcode-cn.com/problems/average-of-levels-in-binary-tree/description/
 func averageOfLevels(root *TreeNode) []float64 {
 	var result []float64
 	var bfs func(nodes []*TreeNode)
@@ -28,6 +29,7 @@ func averageOfLevels(root *TreeNode) []float64 {
 // 找树左下角的值
 // 给定一个二叉树的 根节点 root，请找出该二叉树的 最底层 最左边 节点的值。
 // 假设二叉树中至少有一个节点。
+// https://leetcode-cn.com/problems/find-bottom-left-tree-value/description/
 func findBottomLeftValue(root *TreeNode) int {
 	var result int
 	var bfs func(nodes []*TreeNode)
