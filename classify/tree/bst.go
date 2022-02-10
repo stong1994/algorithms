@@ -149,3 +149,157 @@ func lowestCommonAncestor2(root, p, q *TreeNode) *TreeNode {
 		return left
 	}
 }
+
+// 从有序数组中构造二叉查找树
+// 给你一个整数数组 nums ，其中元素已经按 升序 排列，请你将其转换为一棵 高度平衡 二叉搜索树。
+// 高度平衡 二叉树是一棵满足「每个节点的左右两个子树的高度差的绝对值不超过 1 」的二叉树。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/convert-sorted-array-to-binary-search-tree
+func sortedArrayToBST(nums []int) *TreeNode {
+	// 选择中间节点作为根节点，左边的节点作为左子树，右边的节点作为右子树，并递归
+	L := len(nums)
+	if L == 0 {
+		return nil
+	}
+	if L == 1 {
+		return &TreeNode{
+			Val: nums[0],
+		}
+	}
+	return &TreeNode{
+		Val:   nums[L/2],
+		Left:  sortedArrayToBST(nums[:L/2]),
+		Right: sortedArrayToBST(nums[L/2+1:]),
+	}
+}
+
+// 根据有序链表构造平衡的二叉查找树
+// 给定一个单链表，其中的元素按升序排序，将其转换为高度平衡的二叉搜索树。
+// 本题中，一个高度平衡二叉树是指一个二叉树每个节点的左右两个子树的高度差的绝对值不超过 1。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree
+func sortedListToBST(head *ListNode) *TreeNode {
+	var list []int
+	for head != nil {
+		list = append(list, head.Val)
+		head = head.Next
+	}
+	return sortedArrayToBST(list)
+}
+
+type ListNode struct {
+	Val  int
+	Next *ListNode
+}
+
+func sortedListToBST2(head *ListNode) *TreeNode {
+	// 找到中间节点，作为根节点，剩余左部分做左子树，右部分做右子树
+	// 中间节点可使用快慢双指针
+	if head == nil {
+		return nil
+	}
+	if head.Next == nil {
+		return &TreeNode{
+			Val: head.Val,
+		}
+	}
+	fast, slow := head, head
+	var lastSlow *ListNode
+	for fast != nil && fast.Next != nil {
+		lastSlow = slow
+		slow = slow.Next
+		fast = fast.Next.Next
+	}
+	lastSlow.Next = nil
+	return &TreeNode{
+		Val:   slow.Val,
+		Left:  sortedListToBST2(head),
+		Right: sortedListToBST2(slow.Next),
+	}
+}
+
+// *****
+func sortedListToBST3(head *ListNode) *TreeNode {
+	// 链表的值是递增，正好符合中序遍历，因此可以利用中序遍历来构建二叉查找树
+	// 对于每棵树，先构建其左子节点，再构建其根节点，然后是右子节点，这样符合链表的遍历顺序，但是需要预留根节点的值，因此使用中序遍历
+	L := 0
+	h := head
+	for head != nil {
+		head = head.Next
+		L++
+	}
+	var build func(start, end int) *TreeNode
+	build = func(start, end int) *TreeNode {
+		if start > end {
+			return nil
+		}
+		mid := (start + end) / 2
+		root := new(TreeNode)
+		root.Left = build(start, mid-1)
+		root.Val = h.Val
+		h = h.Next
+		root.Right = build(mid+1, end)
+		return root
+	}
+	return build(0, L-1)
+}
+
+// 在二叉查找树中寻找两个节点，使它们的和为一个给定值
+// 给定一个二叉搜索树 root 和一个目标结果 k，如果 BST 中存在两个元素且它们的和等于给定的目标结果，则返回 true。
+// 提示:
+//二叉树的节点个数的范围是[1, 10^4].
+//-10^4<= Node.val <= 10^4
+//root为二叉搜索树
+//-10^5<= k <= 10^5
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/two-sum-iv-input-is-a-bst
+func findTarget(root *TreeNode, k int) bool {
+	// 如果是在一个有序数组中找到和为k的两个元素要如何做？利用分别指向最大值和最小值的双指针，比较和的大小并移动指针即可。
+	// 二叉树中只有左子树和右子树，不能同时从两头开始遍历，因此需要同时进行两次遍历，一个先遍历左子树，另一个先遍历右子树，即一个为前序遍历，另一个为逆序的中序遍历
+	// 用数量来记录两者最多能够移动的步数
+	//var getNum func(node *TreeNode) int
+	//getNum = func(node *TreeNode) int {
+	//	if node == nil {
+	//		return 0
+	//	}
+	//	return 1 + getNum(node.Left) +getNum(node.Right)
+	//}
+
+	var (
+		left     int
+		right    int
+		leftIdx  int
+		rightIdx int
+	)
+
+	var list []int
+	var dfs func(node *TreeNode)
+	dfs = func(node *TreeNode) {
+		if node == nil {
+			return
+		}
+		dfs(node.Left)
+		list = append(list, node.Val)
+		dfs(node.Right)
+	}
+	dfs(root)
+
+	if len(list) < 2 {
+		return false
+	}
+	leftIdx = 0
+	rightIdx = len(list) - 1
+
+	for leftIdx < rightIdx {
+		left = list[leftIdx]
+		right = list[rightIdx]
+		if left+right < k {
+			leftIdx++
+		} else if left+right > k {
+			rightIdx--
+		} else {
+			return true
+		}
+	}
+	return false
+}
