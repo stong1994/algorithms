@@ -4,6 +4,45 @@ import (
 	"math"
 )
 
+// 用队列实现栈
+// 请你仅使用两个队列实现一个后入先出（LIFO）的栈，并支持普通栈的全部四种操作（push、top、pop 和 empty）。
+//实现 MyStack 类：
+//	void push(int x) 将元素 x 压入栈顶。
+//	int pop() 移除并返回栈顶元素。
+//	int top() 返回栈顶元素。
+//	boolean empty() 如果栈是空的，返回 true ；否则，返回 false 。
+// 注意：
+// 你只能使用队列的基本操作 —— 也就是push to back、peek/pop from front、size 和is empty这些操作。
+// 你所使用的语言也许不支持队列。你可以使用 list （列表）或者 deque（双端队列）来模拟一个队列, 只要是标准的队列操作即可。
+//
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/implement-stack-using-queues
+type MyStack struct {
+	list []int
+}
+
+func ConstructorStack() MyStack {
+	return MyStack{}
+}
+
+func (this *MyStack) Push(x int) {
+	this.list = append(this.list, x)
+}
+
+func (this *MyStack) Pop() int {
+	v := this.list[len(this.list)-1]
+	this.list = this.list[:len(this.list)-1]
+	return v
+}
+
+func (this *MyStack) Top() int {
+	return this.list[len(this.list)-1]
+}
+
+func (this *MyStack) Empty() bool {
+	return len(this.list) == 0
+}
+
 // 用栈实现队列
 // 请你仅使用两个栈实现先入先出队列。队列应当支持一般队列支持的所有操作（push、pop、peek、empty）：
 // 实现 MyQueue 类：
@@ -158,37 +197,48 @@ func dailyTemperatures(temperatures []int) []int {
 //链接：https://leetcode-cn.com/problems/next-greater-element-ii
 func nextGreaterElements(nums []int) []int {
 	// 遍历两次，构建递减栈。用当前元素与栈顶元素比较，如果当前元素大于栈顶元素，则pop栈顶元素；否则将当前元素入栈
-	// 最后将栈内的元素对应的索引对应的结果赋值为-1
+	//result := make([]int, len(nums))
+	//for i := range result {
+	//	result[i] = -1
+	//}
+	//stack := make([][2]int, 0)
+	//L := len(nums)
+	//for j := 0; j <= 1; j++ {
+	//	for i := 0; i < len(nums); i++ {
+	//		cur := nums[i]
+	//		for len(stack) > 0 {
+	//			top := stack[len(stack)-1]
+	//			if top[1] >= cur {
+	//				break
+	//			}
+	//			idx := top[0]
+	//			if idx >= L {
+	//				idx -= L
+	//			}
+	//			result[idx] = cur
+	//			stack = stack[:len(stack)-1]
+	//		}
+	//		stack = append(stack, [2]int{L*j + i, cur})
+	//	}
+	//}
+	//return result
+
 	result := make([]int, len(nums))
+	for i := range result {
+		result[i] = -1
+	}
 	stack := make([][2]int, 0)
 	L := len(nums)
-	for j := 0; j <= 1; j++ {
-		for i := 0; i < len(nums); i++ {
-			if result[i] > 0 {
-				continue
+	for i := 0; i < 2*L-1; i++ {
+		cur := nums[i%L]
+		for ; len(stack) > 0; stack = stack[:len(stack)-1] {
+			top := stack[len(stack)-1]
+			if cur <= top[1] {
+				break
 			}
-			cur := nums[i]
-			for len(stack) > 0 {
-				top := stack[len(stack)-1]
-				if top[1] >= cur {
-					break
-				}
-				idx := top[0]
-				if idx >= L {
-					idx -= L
-				}
-				result[idx] = cur
-				stack = stack[:len(stack)-1]
-			}
-			stack = append(stack, [2]int{L*j + i, cur})
+			result[top[0]] = cur
 		}
-	}
-	for _, v := range stack {
-		idx := v[0]
-		if idx >= L {
-			idx -= L
-		}
-		result[idx] = -1
+		stack = append(stack, [2]int{i % L, cur})
 	}
 	return result
 }
