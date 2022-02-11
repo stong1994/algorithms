@@ -1,5 +1,7 @@
 package tree
 
+import "math"
+
 // 二叉查找树
 // 二叉查找树的特点：根节点大于等于左子树所有节点，小于等于右子树所有节点——因此中序遍历是非递减的。
 // 修剪二叉搜索树
@@ -302,4 +304,90 @@ func findTarget(root *TreeNode, k int) bool {
 		}
 	}
 	return false
+}
+
+// 二叉搜索树的最小绝对差
+// 给你一个二叉搜索树的根节点 root ，返回 树中任意两不同节点值之间的最小差值 。
+// 差值是一个正数，其数值等于两值之差的绝对值。
+// 提示：
+//	树中节点的数目范围是 [2, 10^4]
+//	0 <= Node.val <= 10^5
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/minimum-absolute-difference-in-bst
+func getMinimumDifference(root *TreeNode) int {
+	// 二叉查找树可以看做是递增的数组，只要比较相邻的元素大小即可。
+	var (
+		last   int
+		minVal = math.MaxInt32
+	)
+	initLast := false
+	var dfs func(node *TreeNode)
+	dfs = func(node *TreeNode) {
+		if node == nil {
+			return
+		}
+		dfs(node.Left)
+		if !initLast {
+			last = node.Val
+			initLast = true
+		} else {
+			minVal = min(node.Val-last, minVal)
+			last = node.Val
+		}
+		dfs(node.Right)
+	}
+	dfs(root)
+	return minVal
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// 寻找二叉查找树中出现次数最多的值
+// 给你一个含重复值的二叉搜索树（BST）的根节点 root ，找出并返回 BST 中的所有 众数（即，出现频率最高的元素）。
+//如果树中有不止一个众数，可以按 任意顺序 返回。
+//假定 BST 满足如下定义：
+//结点左子树中所含节点的值 小于等于 当前节点的值
+//结点右子树中所含节点的值 大于等于 当前节点的值
+//左子树和右子树都是二叉搜索树
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/find-mode-in-binary-search-tree
+func findMode(root *TreeNode) []int {
+	// 在一个有序数组中，从左到右依次遍历
+	curNum := 0
+	maxNum := 0
+	last := math.MaxInt32
+	var result []int
+	var dfs func(node *TreeNode)
+	dfs = func(node *TreeNode) {
+		if node == nil {
+			return
+		}
+		dfs(node.Left)
+		if node.Val != last {
+			if curNum > maxNum {
+				result = []int{last}
+				maxNum = curNum
+			} else if curNum == maxNum && curNum != 0 {
+				result = append(result, last)
+			}
+			curNum = 1
+			last = node.Val
+		} else {
+			curNum++
+		}
+		dfs(node.Right)
+	}
+	dfs(root)
+	if curNum == maxNum {
+		result = append(result, last)
+	}
+	if curNum > maxNum {
+		result = []int{last}
+	}
+	return result
 }
