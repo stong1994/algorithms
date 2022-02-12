@@ -2,6 +2,37 @@ package str
 
 // 回环字符串
 
+/*
+推导过程
+*/
+
+func findPalindrome(s string, l, r int) string {
+	for ; l >= 0 && r < len(s); l, r = l-1, r+1 {
+		if s[l] != s[r] {
+			break
+		}
+	}
+	return s[l+1 : r]
+}
+
+func findLongestPalindrome(s string) string {
+	if len(s) <= 1 {
+		return s
+	}
+	var result string
+	for i := 0; i < len(s)-1; i++ {
+		s1 := findPalindrome(s, i, i)
+		s2 := findPalindrome(s, i, i+1)
+		if len(s1) < len(s2) {
+			s1 = s2
+		}
+		if len(s1) > len(result) {
+			result = s1
+		}
+	}
+	return result
+}
+
 // 计算一组字符集合可以组成的回文字符串的最大长度
 // 给定一个包含大写字母和小写字母的字符串s，返回通过这些字母构造成的 最长的回文串。
 // 在构造过程中，请注意 区分大小写 。比如"Aa"不能当做一个回文字符串。

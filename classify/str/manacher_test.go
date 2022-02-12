@@ -26,6 +26,11 @@ func Test_manacher(t *testing.T) {
 			args: args{s: "aabccbab"},
 			want: "abccba",
 		},
+		{
+			name: "example4",
+			args: args{s: "bab"},
+			want: "bab",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

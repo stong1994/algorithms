@@ -18,43 +18,40 @@ func preProcess(s string) string {
 }
 
 func manacher(s string) string {
-	newStr := preProcess(s)
-	N := len(newStr)
-	p := make([]int, N) // newStr对应的数组，元素值为在newStr中以当前元素为中心的回文字符串的最大半径。那么p[i]-1就是原字符串s以i为中心的最大回文长度
+	rebuild := preProcess(s)
 	var (
-		rt  = 0 // 已经计算过的回文字符串能达到的最远右边界的下一个元素索引,即rt=max(j+p[j]), 1<=j<=i-1
-		mid = 0 // mid表示rt所对应的最左侧的回文中心，有mid + p[mid] = rt
+		rMax = 0                         // 当前右边界
+		p    = make([]int, len(rebuild)) // 回环长度数组
+		mid  = 0                         // 当前右边界为rMax的回环子串的中心索引
 	)
-	for i := 1; i < N-1; i++ { // i为0时，newStr对应的元素为“哨兵”^，其肯定不是回文中心，因此可以从第一个元素开始。同理，最后一个元素也可以忽略
-		if rt > i { // i在已知的回文字符串内，可利用已知条件求出p[i]的已知值，稍后使用中心扩展寻找其最大值
-			iMirror := 2*mid - i         // 以mid为中心的回文字符串中的与第i个元素对称的元素索引
-			p[i] = min(rt-i, p[iMirror]) // 防止p[i]超出已知的最大回文右边界,若p[iMrror]超出已知的右边界，那么p[i]等于i到右边界的距离
+	for i := 1; i < len(rebuild)-1; i++ { // 首尾两个哨兵不用管
+		if i > rMax { // 没有经验可供借鉴，需要从零开始进行中心扩展
+			p[i] = 0
 		} else {
-			p[i] = 1 // i大于等于已知的最大回文字符串的右边界，因此将当前值设为1，并随后进行“中心扩展”
+			p[i] = min(rMax-i, p[mid*2-i]) // 借鉴下历史经验——镜像值,如果镜像值超过rMax-i，说明借鉴的不是当前的历史经验
 		}
-		// 中心扩展（有两端的哨兵存在，不用担心越界问题）
-		for newStr[i+p[i]] == newStr[i-p[i]] {
+		// 中心扩展
+		for rebuild[i+p[i]+1] == rebuild[i-p[i]-1] { // 因为哨兵一定与其他元素不等，因此无需考虑边界溢出
 			p[i]++
 		}
-		if i+p[i] > rt { // 更新当前最大的rt
+		// 动态更新右边界和中心索引
+		if i+p[i] > rMax {
 			mid = i
-			rt = i + p[i]
+			rMax = mid + p[mid] // 右边界索引 = 当前中心索引+半径长度
 		}
 	}
-	// 找出p的最大值
 	var (
 		maxLen    = 0
 		centerIdx = 0
 	)
-	for i := 0; i < N-1; i++ {
+	for i := 1; i < len(p)-1; i++ {
 		if p[i] > maxLen {
-			maxLen = p[i] - 1
+			maxLen = p[i]
 			centerIdx = i
 		}
 	}
 	startIdx := (centerIdx - maxLen) / 2
 	return s[startIdx : startIdx+maxLen]
-
 }
 
 func min(a, b int) int {
