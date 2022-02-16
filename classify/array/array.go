@@ -406,3 +406,38 @@ func isToeplitzMatrix(matrix [][]int) bool {
 }
 
 // 嵌套数组
+// 索引从0开始长度为N的数组A，包含0到N - 1的所有整数。找到最大的集合S并返回其大小，其中 S[i] = {A[i], A[A[i]], A[A[A[i]]], ... }且遵守以下的规则。
+//假设选择索引为i的元素A[i]为S的第一个元素，S的下一个元素应该是A[A[i]]，之后是A[A[A[i]]]... 以此类推，不断添加直到S出现重复的元素。
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/array-nesting
+func arrayNesting(nums []int) int {
+	/*maxCnt := 0
+	used := make(map[int]bool)
+	for i := 0; i < len(nums); i++ {
+		if used[i] {
+			continue
+		}
+		cnt := 0
+		for !used[i] {
+			used[i] = true
+			i = nums[i]
+			cnt++
+		}
+		maxCnt = max(maxCnt, cnt)
+	}
+	return maxCnt*/
+	// 空间优化
+	maxCnt := 0
+	for i := 0; i < len(nums); i++ {
+		if nums[i] == -1 {
+			continue
+		}
+		cnt := 0
+		for j := i; nums[j] != -1; {
+			nums[j], j = -1, nums[j]
+			cnt++
+		}
+		maxCnt = max(maxCnt, cnt)
+	}
+	return maxCnt
+}
