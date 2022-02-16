@@ -374,3 +374,35 @@ func findShortestSubArray(nums []int) int {
 	}
 	return maxLen
 }
+
+// 对角元素相等的矩阵
+// 给你一个 m x n 的矩阵 matrix 。如果这个矩阵是托普利茨矩阵，返回 true ；否则，返回 false 。
+// 如果矩阵上每一条由左上到右下的对角线上的元素都相同，那么这个矩阵是 托普利茨矩阵 。
+// 进阶：
+//	如果矩阵存储在磁盘上，并且内存有限，以至于一次最多只能将矩阵的一行加载到内存中，该怎么办？
+//	如果矩阵太大，以至于一次只能将不完整的一行加载到内存中，该怎么办？
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/toeplitz-matrix
+func isToeplitzMatrix(matrix [][]int) bool {
+	// 每个元素都要和其右下相邻的元素相等
+	m := len(matrix)
+	n := len(matrix[0])
+	/*var match func(i, j int) bool
+	match = func(i, j int) bool {
+		if i >= m-1 || j >= n-1 {
+			return true
+		}
+		return matrix[i][j] == matrix[i+1][j+1] && match(i, j+1) && match(i+1, j) && match(i+1, j+1)
+	}
+	return match(0, 0)*/
+	for i := 1; i < m; i++ {
+		for j := 1; j < n; j++ {
+			if matrix[i][j] != matrix[i-1][j-1] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// 嵌套数组
