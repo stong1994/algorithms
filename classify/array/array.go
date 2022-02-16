@@ -248,3 +248,63 @@ func min(a, b int) int {
 	}
 	return a
 }
+
+// 一个数组元素在 [1, n] 之间，其中一个数被替换为另一个数，找出重复的数和丢失的数
+// 集合 s 包含从 1 到n的整数。不幸的是，因为数据错误，导致集合里面某一个数字复制了成了集合里面的另外一个数字的值，导致集合 丢失了一个数字 并且 有一个数字重复 。
+// 给定一个数组 nums 代表了集合 S 发生错误后的结果。
+// 请你找出重复出现的整数，再找到丢失的整数，将它们以数组的形式返回。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/set-mismatch
+func findErrorNums(nums []int) []int {
+	// 元素在1~n之间，构建一个长度为n+1的数组list，遍历nums，将对应的值作为索引存入到list，如果该索引已有值，说明这就是重复的整数。最后遍历一遍list，找到为空的值
+	list := make([]int, len(nums)+1)
+	for _, num := range nums {
+		list[num]++
+	}
+	var dup, lost int
+	for num := 1; num < len(list); num++ {
+		if list[num] == 0 {
+			lost = num
+		}
+		if list[num] == 2 {
+			dup = num
+		}
+	}
+	return []int{dup, lost}
+}
+
+// 找出数组中重复的数，数组值在 [1, n] 之间
+// 给定一个包含n + 1 个整数的数组nums ，其数字都在[1, n]范围内（包括 1 和 n），可知至少存在一个重复的整数。
+//假设 nums 只有 一个重复的整数 ，返回这个重复的数 。
+//你设计的解决方案必须 不修改 数组 nums 且只用常量级 O(1) 的额外空间。
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/find-the-duplicate-number
+func findDuplicate(nums []int) int {
+	// 将nums的每个元素放到二进制数组中，再将无重复数的[1,n]放到新的二进制数组中，此时比较两个二进制数组，前者比后者多出来的元素组成的值就是重复值
+	// 如[1,2,3,2]对应的二进制数组为[2,3](第0个1有两个，第1个1有3个)，[1,2,3]对应的二进制数组为[2,2]，多出来的二进制元素为10,也就是2
+	// 由于只能使用常量级的额外空间，因此不能直接使用数组，只能用for循环来找到每个元素
+	n := len(nums)
+	maxBit := 31
+	for (n-1)>>maxBit == 0 {
+		maxBit--
+	}
+	maxBit++
+	var result int
+	for bit := 0; bit <= maxBit; bit++ {
+		x, y := 0, 0 // x:nums中该位对应的数量，y:[1,n-1]中该位对应的数量
+		for i := 0; i < n; i++ {
+			// i作为nums的索引
+			if nums[i]&(1<<bit) > 0 {
+				x++
+			}
+			// i作为[1,n-1]中的值
+			if i >= 1 && (i&(1<<bit)) > 0 {
+				y++
+			}
+		}
+		if x > y {
+			result |= 1 << bit
+		}
+	}
+	return result
+}
