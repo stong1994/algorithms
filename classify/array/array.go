@@ -1,5 +1,7 @@
 package array
 
+import "math"
+
 // 把数组中的 0 移到末尾
 // 给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序。
 // 请注意 ，必须在不复制数组的情况下原地对数组进行操作。
@@ -307,4 +309,68 @@ func findDuplicate(nums []int) int {
 		}
 	}
 	return result
+}
+
+// 数组相邻差值的个数
+// 给你两个整数 n 和 k ，请你构造一个答案列表 answer ，该列表应当包含从 1 到 n 的 n 个不同正整数，并同时满足下述条件：
+// 假设该列表是 answer =[a1, a2, a3, ... , an] ，那么列表 [|a1 - a2|, |a2 - a3|, |a3 - a4|, ... , |an-1 - an|] 中应该有且仅有 k 个不同整数。
+// 返回列表 answer 。如果存在多种答案，只需返回其中 任意一种 。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/beautiful-arrangement-ii
+func constructArray(n int, k int) []int {
+	// 由n可以构成连续的等差数列[1,2,3,..,n]
+	// 为了保证相邻元素的差互不相等，可考虑将最大值和最小值放一起，即[1,2,3,..,n]可以变为[1,n,2,n-1,...]
+	result := make([]int, n)
+	// 要求有k个不同的差值，那么后k+1个元素的差值不同即可，所以前n-(k+1)个元素差值要相同，即为1
+	for i := 0; i < n-k-1; i++ {
+		result[i] = i + 1
+	}
+	var (
+		j     = 0
+		left  = n - k
+		right = n
+	)
+	// 要求有k个不同的差值，那么后k+1个元素的差值不同即可
+	// 交替取值，第m个取right，第m+1取left
+	for i := n - k - 1; i < n; i++ {
+		if j%2 == 0 {
+			result[i] = left
+			left++
+		} else {
+			result[i] = right
+			right--
+		}
+		j++
+	}
+	return result
+}
+
+// 数组的度
+// 给定一个非空且只包含非负数的整数数组nums，数组的 度 的定义是指数组里任一元素出现频数的最大值。
+// 你的任务是在 nums 中找到与nums拥有相同大小的度的最短连续子数组，返回其长度。
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/degree-of-an-array
+func findShortestSubArray(nums []int) int {
+	// 找到度最大的num，然后找到该num在nums中的左右两个索引，差值就是长度
+	hash := make(map[int][3]int)
+	for i, num := range nums {
+		if v, exist := hash[num]; exist {
+			hash[num] = [3]int{v[0] + 1, v[1], i}
+		} else {
+			hash[num] = [3]int{1, i, i}
+		}
+	}
+	var (
+		maxLen = math.MaxInt32
+		maxCnt = 0
+	)
+	for _, v := range hash {
+		if v[0] > maxCnt {
+			maxCnt = v[0]
+			maxLen = v[2] - v[1] + 1
+		} else if v[0] == maxCnt {
+			maxLen = min(maxLen, v[2]-v[1]+1)
+		}
+	}
+	return maxLen
 }
