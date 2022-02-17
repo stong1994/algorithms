@@ -52,45 +52,55 @@ func isBipartite(graph [][]int) bool {
 	return ok
 }
 
-func isBipartite_uf(graph [][]int) bool {
-	type unionFind struct {
-		roots []int // 第i个节点的连通根节点 即i与roots[i]是连通的
+// 可能的二分法
+// 给定一组n人（编号为1, 2, ..., n），我们想把每个人分进任意大小的两组。每个人都可能不喜欢其他人，那么他们不应该属于同一组。
+// 给定整数 n和数组 dislikes，其中dislikes[i] = [ai, bi]，表示不允许将编号为 ai和bi的人归入同一组。当可以用这种方法将所有人分进两组时，返回 true；否则返回 false。
+// 提示：
+//	1 <= n <= 2000
+//	0 <= dislikes.length <= 104
+//	dislikes[i].length == 2
+//	1 <= dislikes[i][j] <= n
+//	ai< bi
+//	dislikes中每一组都 不同
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/possible-bipartition
+func possibleBipartition_dfs(n int, dislikes [][]int) bool {
+	// 可以把 dislikes 中每个元组看成结点之间的边，根据结点关系画出图，相邻的结点之间的颜色不能相同。如果我们能够利用两种颜色把所有结点着色就说明可以把这些结点分为两类。
+	if len(dislikes) == 0 {
+		return true
 	}
-	newUF := func(n int) *unionFind {
-		r := make([]int, n)
-		for i := 0; i < n; i++ {
-			r[i] = i
-		}
-		return &unionFind{roots: r}
-	}
-	// 寻找k的连通根节点
-	var find func(uf *unionFind, k int) int
-	find = func(uf *unionFind, k int) int {
-		if uf.roots[k] == k {
-			return k
-		}
-		return find(uf, uf.roots[k])
-	}
-	// 判断pq是否在同一集合
-	isConnected := func(uf *unionFind, p, q int) bool {
-		return find(uf, p) == find(uf, q)
-	}
-	// 合并q所在的集合到p所在的集合
-	union := func(uf *unionFind, p, q int) {
-		uf.roots[find(uf, q)] = find(uf, p)
+	colors := make([]bool, n+1)
+	visit := make([]bool, n+1)
+
+	dislikeMap := make(map[int][]int)
+	for _, d := range dislikes {
+		dislikeMap[d[0]] = append(dislikeMap[d[0]], d[1])
+		dislikeMap[d[1]] = append(dislikeMap[d[1]], d[0])
 	}
 
-	// 初始化并查集
-	uf := newUF(len(graph))
-	// 遍历每个顶点，将当前顶点的所有邻接点进行合并
-	for i, adjs := range graph {
-		for _, w := range adjs {
-			// 若某个邻接点与当前顶点已经在一个集合中了，说明不是二分图，返回 false。
-			if isConnected(uf, i, w) {
-				return false
+	ok := true
+	var dfs func(k int)
+	dfs = func(k int) {
+		if !ok {
+			return
+		}
+		visit[k] = true
+		color := colors[k]
+		for _, v := range dislikeMap[k] {
+			if !visit[v] {
+				colors[v] = !color
+				dfs(v)
+			} else {
+				if colors[v] == color {
+					ok = false
+				}
 			}
-			union(uf, adjs[0], w)
 		}
 	}
-	return true
+	for i := 1; i <= n; i++ { // 不是连通图，所以对每个节点进行遍历
+		if !visit[i] {
+			dfs(i)
+		}
+	}
+	return ok
 }
