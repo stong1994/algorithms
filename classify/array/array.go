@@ -441,3 +441,24 @@ func arrayNesting(nums []int) int {
 	}
 	return maxCnt
 }
+
+// 分隔数组
+// 给定一个长度为 n 的整数数组 arr ，它表示在 [0, n - 1] 范围内的整数的排列。
+// 我们将 arr 分割成若干 块 (即分区)，并对每个块单独排序。将它们连接起来后，使得连接的结果和按升序排序后的原数组相同。
+// 返回数组能分成的最多块数量。
+// ex：[1,0,2,3,4]可以转换为[1, 0], [2, 3, 4]，也可以是 [1, 0], [2], [3], [4]
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/max-chunks-to-make-sorted
+func maxChunksToSorted(arr []int) int {
+	// arr中的元素是乱序的0到n-1，即数组中的每个值都可以作为索引
+	// 当数组中的最大值等于其当前索引时，说明这个数组中的包含了0~maxVal的所有值。这就是我们要获得的块。
+	cnt := 0
+	maxVal := -1
+	for i, v := range arr {
+		maxVal = max(maxVal, v)
+		if maxVal == i {
+			cnt++
+		}
+	}
+	return cnt
+}
