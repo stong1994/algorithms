@@ -32,3 +32,28 @@ func singleNumber(nums []int) int {
 	}
 	return nums[len(nums)-1]
 }
+
+// 找出数组中缺失的那个数
+// https://leetcode-cn.com/problems/missing-number/
+func missingNumber(nums []int) int {
+	/*
+		n := len(nums)
+		sum := 0
+		total := n*(n+1)/2
+		for _, v := range nums {
+		    sum += v
+		}
+		return total - sum
+	*/
+	// 将该题转换为《数组中唯一不重复的元素》，即在nums后边append 0~n+1即可
+	n := len(nums)
+	for i := 0; i < n+1; i++ {
+		nums = append(nums, i)
+	}
+	for i := 1; i < len(nums); i++ {
+		nums[i] ^= nums[i-1]
+	}
+	return nums[len(nums)-1]
+}
+
+// 数组中不重复的两个元素
