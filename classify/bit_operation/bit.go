@@ -110,3 +110,12 @@ func reverseBits(num uint32) uint32 {
 	num = num>>8&m8 | num&m8<<8 // 将相邻的8位两两互换
 	return num>>16 | num<<16    // // 将相邻的16位两两互换
 }
+
+// 不用额外变量交换两个整数
+// 程序员代码面试指南 ：P317
+func swap(a, b int) (int, int) {
+	a = a ^ b
+	b = a ^ b // b = a^b^b
+	a = a ^ b // a = a^a^b
+	return a, b
+}
