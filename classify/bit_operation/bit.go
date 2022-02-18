@@ -139,3 +139,10 @@ func isPowerOfFour(n int) bool {
 }
 
 // 判断一个数的位级表示是否不会出现连续的 0 和 1
+// https://leetcode-cn.com/problems/binary-number-with-alternating-bits/
+func hasAlternatingBits(n int) bool {
+	// 二进制表示中相邻两位是否永远不同
+	// 如果相邻两位永远不同，那么右移1位后与原数据进行异或操作，的得到全是1，此时加1后得到的位中只有一个1，通过 num & (num-1) == 0 来判断
+	num := n ^ (n >> 1) + 1
+	return num&(num-1) == 0
+}
