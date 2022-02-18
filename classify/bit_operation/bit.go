@@ -2,7 +2,8 @@ package bit_operation
 
 /* 位操作
 1. a^b^^c 如果三个数中有两个数相等，那么通过异或操作可以找到三个数中不同的那个数
-2. b := a & -a 找到a中最低位为1的那位对应的值
+2. a & -a 找到a中最低位为1的那位对应的值
+3. n & (n - 1) 将n中的最低位1移除
 */
 
 // 统计两个数的二进制表示有多少位不同
@@ -118,4 +119,13 @@ func swap(a, b int) (int, int) {
 	b = a ^ b // b = a^b^b
 	a = a ^ b // a = a^a^b
 	return a, b
+}
+
+// 判断一个数是不是 2 的 n 次方
+func isPowerOfTwo(n int) bool {
+	if n <= 0 {
+		return false
+	}
+	// 2的幂次增加的过程就是向左移位的过程
+	return n&-n == n
 }
