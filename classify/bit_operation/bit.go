@@ -163,3 +163,19 @@ func findComplement(num int) int {
 	}
 	return int(^n)
 }
+
+// 实现整数的加法
+// 给你两个整数 a 和 b ，不使用 运算符 + 和 -，计算并返回两整数之和。
+// https://leetcode-cn.com/problems/sum-of-two-integers
+func getSum(a int, b int) int {
+	// 对于a和b之和，每位的值为a和b不进位的加法 加上 a和b进位的加法。
+	// 当a和b不进位时，和为a^b
+	// 当a和b做进位时，值为 a&b << 1
+	// https://leetcode-cn.com/problems/sum-of-two-integers/solution/liang-zheng-shu-zhi-he-wei-yun-suan-qing-7095/
+	if a == 0 {
+		return b
+	}
+	carry := uint(a&b) << 1
+	sum := a ^ b
+	return getSum(int(carry), sum)
+}
