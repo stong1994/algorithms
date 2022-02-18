@@ -1,5 +1,10 @@
 package bit_operation
 
+/* 位操作
+1. a^b^^c 如果三个数中有两个数相等，那么通过异或操作可以找到三个数中不同的那个数
+2. b := a & -a 找到a中最低位为1的那位对应的值
+*/
+
 // 统计两个数的二进制表示有多少位不同
 // https://leetcode-cn.com/problems/hamming-distance/
 func hammingDistance(x int, y int) int {
@@ -57,3 +62,26 @@ func missingNumber(nums []int) int {
 }
 
 // 数组中不重复的两个元素
+// 给定一个整数数组nums，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。你可以按 任意顺序 返回答案。
+//进阶：你的算法应该具有线性时间复杂度。你能否仅使用常数空间复杂度来实现？
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/single-number-iii
+func singleNumber2(nums []int) []int {
+	xorSum := 0
+	for _, num := range nums {
+		xorSum ^= num
+	}
+	lsb := xorSum & -xorSum // 取出xorSum二进制中最右边为1的那位，对于异或结果为xorSum的两个数x,y，如果第l位为1，则说明一个数的第l位为1，另一个为0
+	// 将nums分别两类，一类是第l位为1，另一个为0，分别进行异或操作即得两个目标数
+	rst1, rst2 := 0, 0
+	for _, num := range nums {
+		if num&lsb > 0 {
+			rst1 ^= num
+		} else {
+			rst2 ^= num
+		}
+	}
+	return []int{rst1, rst2}
+}
+
+// 翻转一个数的比特位
