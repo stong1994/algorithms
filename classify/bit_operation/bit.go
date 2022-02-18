@@ -122,6 +122,7 @@ func swap(a, b int) (int, int) {
 }
 
 // 判断一个数是不是 2 的 n 次方
+// https://leetcode-cn.com/problems/power-of-two/
 func isPowerOfTwo(n int) bool {
 	if n <= 0 {
 		return false
@@ -129,3 +130,12 @@ func isPowerOfTwo(n int) bool {
 	// 2的幂次增加的过程就是向左移位的过程
 	return n&-n == n
 }
+
+// 判断一个数是不是 4 的 n 次方
+// https://leetcode-cn.com/problems/power-of-four/
+func isPowerOfFour(n int) bool {
+	// 先判断n是2的n次方，再判断1是否存在奇数为即可
+	return n > 0 && n&(n-1) == 0 && n&0xaaaaaaaa == 0
+}
+
+// 判断一个数的位级表示是否不会出现连续的 0 和 1
