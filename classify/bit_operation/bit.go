@@ -146,3 +146,20 @@ func hasAlternatingBits(n int) bool {
 	num := n ^ (n >> 1) + 1
 	return num&(num-1) == 0
 }
+
+// 求一个数的补码
+// 对整数的二进制表示取反（0 变 1 ，1 变 0）后，再转换为十进制表示，可以得到这个整数的补数。
+//例如，整数 5 的二进制表示是 "101" ，取反后得到 "010" ，再转回十进制表示得到补数 2 。
+//给你一个整数 num ，输出它的补数。
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/number-complement
+func findComplement(num int) int {
+	// 对num进行取反，但要排除掉前置1,因此我们可以直接补充前置1，这样取反后就是0
+	n := uint32(num)
+	bit := 31
+	for 1<<bit&n == 0 {
+		n |= 1 << bit
+		bit--
+	}
+	return int(^n)
+}
