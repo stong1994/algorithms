@@ -288,3 +288,16 @@ func max(a, b int) int {
 	}
 	return a
 }
+
+// 统计从 0 ~ n 每个数的二进制表示中 1 的个数
+// 给你一个整数 n ，对于 0 <= i <= n 中的每个 i ，计算其二进制表示中 1 的个数 ，返回一个长度为 n + 1 的数组 ans 作为答案。
+// https://leetcode-cn.com/problems/counting-bits/
+func countBits(n int) []int {
+	// 对于数字6(110)可看做是4(100) + 2(10)的结果，类似于dp[i] = dp[i-1] + 1
+	// 关键点在于如何把最高位干掉（110 =》 10），利用位操作(i&i-1)
+	result := make([]int, n+1)
+	for i := 1; i <= n; i++ {
+		result[i] = result[i&(i-1)] + 1
+	}
+	return result
+}
