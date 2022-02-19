@@ -1,5 +1,7 @@
 package bit_operation
 
+import "sort"
+
 /* 位操作
 1. a^b^^c 如果三个数中有两个数相等，那么通过异或操作可以找到三个数中不同的那个数
 2. a & -a 找到a中最低位为1的那位对应的值
@@ -178,4 +180,111 @@ func getSum(a int, b int) int {
 	carry := uint(a&b) << 1
 	sum := a ^ b
 	return getSum(int(carry), sum)
+}
+
+// 字符串数组最大乘积
+// 给你一个字符串数组words ，找出并返回 length(words[i]) * length(words[j])的最大值，并且这两个单词不含有公共字母。如果不存在这样的两个单词，返回 0 。
+// words[i] 仅包含小写字母
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/maximum-product-of-word-lengths
+func maxProduct(words []string) int {
+	//需要注意两点
+	//1. 两个单词不包含公共字母: words中只包含小写字母，因此可用26个bit来表示每个字符串，没有公共bit，因此两个bit值的与操作结果应为0( b1 & b2 == 0)
+	//2. 最大长度: 暴力破解，两两比较取最大值
+	n := len(words)
+	toBits := func(word string) uint32 {
+		rst := uint32(0)
+		for _, w := range word {
+			rst |= 1 << (w - 'a')
+		}
+		return rst
+	}
+	lengths := make([]int, n)
+	bitsArr := make([]uint32, n)
+	for i := 0; i < n; i++ {
+		bitsArr[i] = toBits(words[i])
+		lengths[i] = len(words[i])
+	}
+	result := 0
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			if bitsArr[i]&bitsArr[j] == 0 {
+				result = max(result, lengths[i]*lengths[j])
+			}
+		}
+	}
+	return result
+}
+
+func maxProduct2(words []string) int {
+	// 需要注意两点
+	//1. 两个单词不包含公共字母: words中只包含小写字母，因此可用26个bit来表示每个字符串，没有公共bit，因此两个bit值的与操作结果应为0( b1 & b2 == 0)
+	//2. 最大长度: 暴力破解，两两比较取最大值
+	// 优化：对于meet和met，具有相同的字符，因此只需要记录最长长度即可。在上个解法中，使用数组存储这两个单词对应的bits，但实际上这两个bits相同，因此可采用哈希表来去重
+	n := len(words)
+	toBits := func(word string) uint32 {
+		rst := uint32(0)
+		for _, w := range word {
+			rst |= 1 << (w - 'a')
+		}
+		return rst
+	}
+	bitsMap := make(map[uint32]int, n)
+	for i := 0; i < n; i++ {
+		bitsMap[toBits(words[i])] = max(bitsMap[toBits(words[i])], len(words[i]))
+	}
+	result := 0
+	// 用map遍历相同的两个bits要比较两次，因此用map虽然节省了空间，但是浪费了时间
+	for b1, l1 := range bitsMap {
+		for b2, l2 := range bitsMap {
+			if b1&b2 == 0 {
+				result = max(result, l1*l2)
+			}
+		}
+	}
+	return result
+}
+
+func maxProduct3(words []string) int {
+	//需要注意两点
+	//1. 两个单词不包含公共字母: words中只包含小写字母，因此可用26个bit来表示每个字符串，没有公共bit，因此两个bit值的与操作结果应为0( b1 & b2 == 0)
+	//2. 最大长度: 暴力破解，两两比较取最大值
+	// 最后比较的时候需要对全量数据两两比较。先对words按长度进行排序，那么最后比较的时候，对每个bits，先用长度大的去比较，得到值就是当前bits能够得到的最大值
+	sort.Slice(words, func(i, j int) bool {
+		if len(words[i]) < len(words[j]) {
+			return false
+		}
+		return true
+	})
+	n := len(words)
+	toBits := func(word string) uint32 {
+		rst := uint32(0)
+		for _, w := range word {
+			rst |= 1 << (w - 'a')
+		}
+		return rst
+	}
+	lengths := make([]int, n)
+	bitsArr := make([]uint32, n)
+	for i := 0; i < n; i++ {
+		bitsArr[i] = toBits(words[i])
+		lengths[i] = len(words[i])
+	}
+	result := 0
+	for i := 0; i < n; i++ {
+		for j := i + 1; j < n; j++ {
+			if bitsArr[i]&bitsArr[j] == 0 {
+				result = max(result, lengths[i]*lengths[j])
+				break
+			}
+		}
+	}
+	return result
+}
+
+func max(a, b int) int {
+	if a < b {
+		return b
+	}
+	return a
 }
