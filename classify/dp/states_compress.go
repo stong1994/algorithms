@@ -1,5 +1,9 @@
 package dp
 
+import (
+	"sort"
+)
+
 // 我能赢吗
 // 在 "100 game" 这个游戏中，两名玩家轮流选择从 1 到 10 的任意整数，累计整数和，先使得累计整数和 达到或超过 100 的玩家，即为胜者。
 // 如果我们将游戏规则改为 “玩家 不能 重复使用整数” 呢？
@@ -119,10 +123,159 @@ func canIWin(maxChoosableInteger int, desiredTotal int) bool {
 // 你将得到一个整数数组 matchsticks ，其中 matchsticks[i] 是第 i个火柴棒的长度。
 // 你要用 所有的火柴棍拼成一个正方形。你 不能折断 任何一根火柴棒，但你可以把它们连在一起，而且每根火柴棒必须 使用一次 。
 // 如果你能使这个正方形，则返回 true ，否则返回 false 。
+// 提示:
+//	1 <= matchsticks.length <= 15
+//	1 <= matchsticks[i] <= 108
 // 来源：力扣（LeetCode）
 // 链接：https://leetcode-cn.com/problems/matchsticks-to-square
 func makesquare(matchsticks []int) bool {
+	// 将matchsticks分成四份，每份的和相等
+	// 暴力破解
+	sum := 0
+	for _, v := range matchsticks {
+		sum += v
+	}
+	if sum%4 != 0 {
+		return false
+	}
+	sideNum := sum / 4
+	sides := make([]int, 4)
+	var find func(selected uint16) bool
+	find = func(selected uint16) bool {
+		if sides[0] == sides[1] && sides[0] == sides[2] && sides[0] == sides[3] && sides[0] == sideNum {
+			return true
+		}
+		for i, stick := range matchsticks {
+			if selected&(1<<i) != 0 {
+				continue
+			}
+			for j, side := range sides {
+				if side+stick > sideNum {
+					continue
+				}
+				sides[j] = side + stick
+				if find(selected | 1<<i) {
+					return true
+				}
+				sides[j] = side
+			}
+		}
+		return false
+	}
+	return find(0)
+}
 
+// 每次都要循环遍历matchsticks，可以去掉。每次都给一根火柴找位置
+func makesquare2(matchsticks []int) bool {
+	// 将matchsticks分成四份，每份的和相等
+	// 暴力破解
+	sum := 0
+	for _, v := range matchsticks {
+		sum += v
+	}
+	if sum%4 != 0 {
+		return false
+	}
+	sideNum := sum / 4
+	sides := make([]int, 4)
+	var find func(idx int) bool
+	find = func(idx int) bool {
+		if idx == len(matchsticks) {
+			if sides[0] == sides[1] && sides[0] == sides[2] && sides[0] == sides[3] && sides[0] == sideNum {
+				return true
+			}
+			return false
+		}
+
+		for j, side := range sides {
+			if side+matchsticks[idx] > sideNum {
+				continue
+			}
+			sides[j] = side + matchsticks[idx]
+			if find(idx + 1) {
+				return true
+			}
+			sides[j] = side
+		}
+		return false
+	}
+	return find(0)
+}
+
+// 如果数组前边的火柴长度较短，那么就需要多次递归，对其排序
+func makesquare3(matchsticks []int) bool {
+	sort.Slice(matchsticks, func(i, j int) bool {
+		return matchsticks[i] > matchsticks[j]
+	})
+	sum := 0
+	for _, v := range matchsticks {
+		sum += v
+	}
+	if sum%4 != 0 {
+		return false
+	}
+	sideNum := sum / 4
+	sides := make([]int, 4)
+	var find func(idx int) bool
+	find = func(idx int) bool {
+		if idx == len(matchsticks) {
+			if sides[0] == sides[1] && sides[0] == sides[2] && sides[0] == sides[3] && sides[0] == sideNum {
+				return true
+			}
+			return false
+		}
+
+		for j, side := range sides {
+			if side+matchsticks[idx] > sideNum {
+				continue
+			}
+			sides[j] = side + matchsticks[idx]
+			if find(idx + 1) {
+				return true
+			}
+			sides[j] = side
+		}
+		return false
+	}
+	return find(0)
+}
+
+// 优化：如果后边的边和前边的边相同，前边的没成功，后边的也不会成功
+func makesquare4(matchsticks []int) bool {
+	sort.Slice(matchsticks, func(i, j int) bool {
+		return matchsticks[i] > matchsticks[j]
+	})
+	sum := 0
+	for _, v := range matchsticks {
+		sum += v
+	}
+	if sum%4 != 0 {
+		return false
+	}
+	sideNum := sum / 4
+	sides := make([]int, 4)
+	var find func(idx int) bool
+	find = func(idx int) bool {
+		if idx == len(matchsticks) {
+			if sides[0] == sides[1] && sides[0] == sides[2] && sides[0] == sideNum {
+				return true
+			}
+			return false
+		}
+
+		for j, side := range sides {
+			if side+matchsticks[idx] > sideNum || (j > 0 && sides[j-1] == sides[j]) || (idx == len(matchsticks)-1 && j != 0) {
+				continue
+			}
+			sides[j] = side + matchsticks[idx]
+			if find(idx + 1) {
+				return true
+			}
+			sides[j] = side
+		}
+		return false
+	}
+	return find(0)
 }
 
 // 好子集的数目

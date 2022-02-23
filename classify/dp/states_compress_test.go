@@ -82,3 +82,42 @@ func Test_canIWin(t *testing.T) {
 		})
 	}
 }
+
+func Test_makesquare(t *testing.T) {
+	type args struct {
+		matchsticks []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "example1",
+			args: args{matchsticks: []int{1, 1, 2, 2, 2}},
+			want: true,
+		},
+		{
+			name: "example2",
+			args: args{matchsticks: []int{3, 3, 3, 3, 4}},
+			want: false,
+		},
+		{
+			name: "example3",
+			args: args{matchsticks: []int{3, 3, 3, 3, 4, 4, 4, 2, 2}},
+			want: true,
+		},
+		{
+			name: "example4",
+			args: args{matchsticks: []int{2, 2, 2, 2, 4, 4, 4, 4, 4}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := makesquare3(tt.args.matchsticks); got != tt.want {
+				t.Errorf("makesquare() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
