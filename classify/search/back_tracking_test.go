@@ -1,6 +1,7 @@
-package classify
+package search
 
 import (
+	"algorithms/classify"
 	"reflect"
 	"testing"
 )
@@ -140,22 +141,22 @@ func Test_exist(t *testing.T) {
 func Test_binaryTreePaths(t *testing.T) {
 	tests := []struct {
 		name string
-		root *TreeNode
+		root *classify.TreeNode
 		want []string
 	}{
 		{
 			name: "example1",
-			root: &TreeNode{
+			root: &classify.TreeNode{
 				Val: 1,
-				Right: &TreeNode{
+				Right: &classify.TreeNode{
 					Val:   3,
 					Right: nil,
 					Left:  nil,
 				},
-				Left: &TreeNode{
+				Left: &classify.TreeNode{
 					Val:  2,
 					Left: nil,
-					Right: &TreeNode{
+					Right: &classify.TreeNode{
 						Val:   5,
 						Right: nil,
 						Left:  nil,
@@ -166,26 +167,26 @@ func Test_binaryTreePaths(t *testing.T) {
 		},
 		{
 			name: "example2",
-			root: &TreeNode{
+			root: &classify.TreeNode{
 				Val: 1,
 			},
 			want: []string{"1"},
 		},
 		{
 			name: "example3",
-			root: &TreeNode{
+			root: &classify.TreeNode{
 				Val: 6,
-				Left: &TreeNode{
+				Left: &classify.TreeNode{
 					Val:  1,
 					Left: nil,
-					Right: &TreeNode{
+					Right: &classify.TreeNode{
 						Val: 3,
-						Left: &TreeNode{
+						Left: &classify.TreeNode{
 							Val: 2,
 						},
-						Right: &TreeNode{
+						Right: &classify.TreeNode{
 							Val: 5,
-							Left: &TreeNode{
+							Left: &classify.TreeNode{
 								Val: 4,
 							},
 						},

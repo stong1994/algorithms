@@ -1,6 +1,7 @@
-package classify
+package search
 
 import (
+	"algorithms/classify"
 	"sort"
 	"strconv"
 	"strings"
@@ -150,9 +151,9 @@ func exist(board [][]byte, word string) bool {
  *     Right *TreeNode
  * }
  */
-func binaryTreePaths(root *TreeNode) []string {
-	var dfsFn func(root *TreeNode, curList []string) [][]string
-	dfsFn = func(root *TreeNode, curList []string) [][]string {
+func binaryTreePaths(root *classify.TreeNode) []string {
+	var dfsFn func(root *classify.TreeNode, curList []string) [][]string
+	dfsFn = func(root *classify.TreeNode, curList []string) [][]string {
 		curList = append(curList, strconv.Itoa(root.Val)) // 注意：append如果不需要扩容，则复用底层数组,因此在dfs时需要进行copy
 		if root.Left == nil && root.Right == nil {
 			return [][]string{curList}

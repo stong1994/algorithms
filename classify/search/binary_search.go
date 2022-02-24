@@ -1,4 +1,4 @@
-package classify
+package search
 
 import (
 	"math"
