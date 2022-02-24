@@ -145,3 +145,63 @@ func Test_countArrangement(t *testing.T) {
 		})
 	}
 }
+
+func Test_canPartitionKSubsets(t *testing.T) {
+	type args struct {
+		nums []int
+		k    int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "example1",
+			args: args{
+				nums: []int{4, 3, 2, 3, 5, 2, 1},
+				k:    4,
+			},
+			want: true,
+		},
+		{
+			name: "example2",
+			args: args{
+				nums: []int{1, 2, 3, 4},
+				k:    3,
+			},
+			want: false,
+		},
+		{
+			name: "example3",
+			args: args{
+				nums: []int{4, 4, 4, 6, 1, 2, 2, 9, 4, 6},
+				k:    3,
+			},
+			want: true,
+		},
+		{
+			name: "example4",
+			args: args{
+				nums: []int{1, 1, 1, 1, 2, 2, 2, 2},
+				k:    3,
+			},
+			want: true,
+		},
+		{
+			name: "example5",
+			args: args{
+				nums: []int{1, 1, 1, 1, 2, 2, 2, 2},
+				k:    4,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := canPartitionKSubsets(tt.args.nums, tt.args.k); got != tt.want {
+				t.Errorf("canPartitionKSubsets() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

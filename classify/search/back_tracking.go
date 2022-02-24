@@ -748,3 +748,57 @@ func solveNQueens(n int) [][]string {
 	backTrack(0)
 	return result
 }
+
+// 划分为k个相等的子集
+// 给定一个整数数组  nums 和一个正整数 k，找出是否有可能把这个数组分成 k 个非空子集，其总和都相等。
+// 提示：
+//	 1 <= k <= len(nums) <= 16
+// 	 0 < nums[i] < 10000
+// 	 每个元素的频率在 [1,4] 范围内
+// https://leetcode-cn.com/problems/partition-to-k-equal-sum-subsets/
+func canPartitionKSubsets(nums []int, k int) bool {
+	// 类似于”用火柴围成一个正方形“
+	// 判断nums是否可以被平分为k个子集
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	if sum%k != 0 {
+		return false
+	}
+	sideSum := sum / k
+	// 对nums逆序排序，可减少递归的次数
+	sort.Slice(nums, func(i, j int) bool {
+		return nums[i] >= nums[j]
+	})
+	// 将每个num放到子集中。
+	subsets := make([]int, k)
+	var dfs func(idx int) bool
+	dfs = func(idx int) bool {
+		if idx == len(nums) {
+			for j := 0; j < k-1; j++ { // 前k-1个是否圆满
+				if subsets[j] != sideSum {
+					return false
+				}
+			}
+			return true
+		}
+		num := nums[idx]
+		for i, subset := range subsets {
+			// 如果当前subset与前一个subset相同，那么num也不能放到当前，因为每个subset的规则都是一样的，如果num符合就会放到前一个subset中
+			if i > 0 && subsets[i-1] != sideSum && subsets[i] == subsets[i-1] {
+				continue
+			}
+			if subset+num > sideSum {
+				continue
+			}
+			subsets[i] = subset + num
+			if dfs(idx + 1) {
+				return true
+			}
+			subsets[i] = subset // 回退状态
+		}
+		return false
+	}
+	return dfs(0)
+}

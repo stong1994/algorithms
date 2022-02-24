@@ -416,3 +416,57 @@ next:
 	}
 	return ans
 }
+
+// 划分为k个相等的子集
+// 给定一个整数数组  nums 和一个正整数 k，找出是否有可能把这个数组分成 k 个非空子集，其总和都相等。
+// 提示：
+//	 1 <= k <= len(nums) <= 16
+// 	 0 < nums[i] < 10000
+// 	 每个元素的频率在 [1,4] 范围内
+// https://leetcode-cn.com/problems/partition-to-k-equal-sum-subsets/
+func canPartitionKSubsets(nums []int, k int) bool {
+	// 类似于”用火柴围成一个正方形“
+	// 判断nums是否可以被平分为k个子集
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	if sum%k != 0 {
+		return false
+	}
+	sideSum := sum / k
+	// 对nums逆序排序，可减少递归的次数
+	sort.Ints(nums)
+
+	isSelected := func(state, k int) bool {
+		return state>>k&1 == 1
+	}
+
+	n := len(nums)
+	stateNum := 1 << n
+	dp := make([]bool, stateNum)        // dp[state]表示当前选择的nums，110表示选择了第二个和第三个num
+	currentSum := make([]int, stateNum) // 当前状态下的已选择nums的sum
+	dp[0] = true                        // 后续需要
+	for state := 0; state < stateNum; state++ {
+		if !dp[state] { // 每次都是基于当前状态为true下进行转移
+			continue
+		}
+		// 基于当前状态，添加一个数
+		for j := 0; j < n; j++ {
+			if isSelected(state, j) { // 当前状态已选择j，跳过
+				continue
+			}
+			nextState := state | 1<<j
+			if dp[nextState] { // 下个状态已被验证
+				continue
+			}
+			if currentSum[state]%sideSum+nums[j] <= sideSum {
+				currentSum[nextState] = currentSum[state] + nums[j]
+				dp[nextState] = true
+			} else { // 如果currentSum[state] % sideSum +nums[j] > sideSum，则说明该状态（选择顺序）无效，因为nums已被排序
+				break
+			}
+		}
+	}
+	return dp[stateNum-1]
+}
