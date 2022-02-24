@@ -278,6 +278,74 @@ func makesquare4(matchsticks []int) bool {
 	return find(0)
 }
 
+// 优美的排列 todo
+// 假设有从 1 到 n 的 n 个整数。用这些整数构造一个数组 perm（下标从 1 开始），只要满足下述条件 之一 ，该数组就是一个 优美的排列 ：
+// perm[i] 能够被 i 整除
+// i 能够被 perm[i] 整除
+// 给你一个整数 n ，返回可以构造的 优美排列 的 数量 。
+// 提示：
+// 	1 <= n <= 15
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/beautiful-arrangement
+func countArrangement(n int) int {
+	mask := 1 << n          // 通过n个bit来表示n个值的选择状态
+	f := make([][]int, n+1) // f[i][state]: 对于前i个位置，状态为state的所有方案数量
+	for i := 0; i < n+1; i++ {
+		f[i] = make([]int, mask)
+	}
+	f[0][0] = 1
+
+	isSelectK := func(state, k int) bool {
+		return state&(1<<(k-1)) > 0
+	}
+
+	// 遍历所有位置i
+	for i := 1; i <= n; i++ {
+		// 枚举所有的选择状态
+		for state := 0; state < mask; state++ {
+			// 枚举位置i选择的数值k
+			for k := 1; k <= n; k++ {
+				if !isSelectK(state, k) {
+					continue
+				}
+				if k%i != 0 && i%k != 0 {
+					continue
+				}
+				f[i][state] += f[i-1][state&(^(1 << (k - 1)))] // state & (^(1 << (k - 1))) 代表将 state 中数值 k 的位置置零
+			}
+		}
+	}
+	return f[n][mask-1]
+}
+
+func countArrangement2(n int) int {
+	getCnt := func(x int) (cnt int) {
+		for x != 0 {
+			x -= x & -x // x & -x 取低位为1的值
+			cnt++
+		}
+		return
+	}
+	mask := 1 << n
+	f := make([]int, mask) // f[state]：选择值为state时的方案数量
+	f[0] = 1
+	for state := 1; state < mask; state++ {
+		cnt := getCnt(state)
+		for i := 0; i < n; i++ {
+			// i必须已选择
+			if state>>i&1 == 0 {
+				continue
+			}
+			//
+			if (i+1)%cnt != 0 && cnt%(i+1) != 0 {
+				continue
+			}
+			f[state] += f[state&(^(1 << i))]
+		}
+	}
+	return f[mask-1]
+}
+
 // 好子集的数目
 // 给你一个整数数组nums。如果nums的一个子集中，所有元素的乘积可以表示为一个或多个 互不相同的质数 的乘积，那么我们称它为好子集。
 //比方说，如果nums = [1, 2, 3, 4]：
