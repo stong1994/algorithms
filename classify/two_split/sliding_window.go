@@ -135,3 +135,94 @@ func checkInclusion(s1 string, s2 string) bool {
 	}
 	return false
 }
+
+// 滑动窗口最大值
+// 给你一个整数数组 nums，有一个大小为k的滑动窗口从数组的最左侧移动到数组的最右侧。
+// 你只可以看到在滑动窗口内的 k个数字。滑动窗口每次只向右移动一位。
+// 返回 滑动窗口中的最大值 。
+// 1 <= nums.length <= 10^5
+// -10^4 <= nums[i] <= 10^4
+// 1 <= k <= nums.length
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/sliding-window-maximum
+func maxSlidingWindow(nums []int, k int) []int {
+	// 取出已有元素的最大值、存入值、取出值：使用两个最大堆来实现
+	// 第一个最大堆用来获取当前最大值，第二个最大堆用来存储待删除的数据
+	heap1, heap2 := NewMaxHeap(), NewMaxHeap()
+	for i := 0; i < k; i++ {
+		heap1.push(nums[i])
+	}
+	var result []int
+	result = append(result, heap1.top())
+	for l, r := 1, k; r < len(nums); l, r = l+1, r+1 {
+		// 更新heap1，将r值放进去，将l-1值取出来.
+		// 取出l-1值在堆中的操作较复杂，可以使用另外一个堆来暂存：如果l-1值就是heap1的最大值，则直接pop；否则，存入heap2（取出时机？在l-1为最大值时，取出）
+		if nums[l-1] == heap1.top() {
+			heap1.pop()
+			for !heap1.isEmpty() && !heap2.isEmpty() && heap1.top() == heap2.top() {
+				heap1.pop()
+				heap2.pop()
+			}
+		} else {
+			heap2.push(nums[l-1])
+		}
+		heap1.push(nums[r])
+		result = append(result, heap1.top())
+	}
+	return result
+}
+
+type MaxHeap struct {
+	pq []int
+}
+
+func NewMaxHeap() *MaxHeap {
+	return &MaxHeap{pq: []int{0}}
+}
+
+func (mh *MaxHeap) isEmpty() bool {
+	return len(mh.pq) <= 1
+}
+
+func (mh *MaxHeap) top() int {
+	return mh.pq[1]
+}
+
+func (mh *MaxHeap) push(k int) {
+	mh.pq = append(mh.pq, k)
+	mh.swim(len(mh.pq) - 1)
+}
+
+func (mh *MaxHeap) pop() (int, bool) {
+	if len(mh.pq) <= 1 {
+		return 0, false
+	}
+	rst := mh.pq[1]
+	mh.pq[1] = mh.pq[len(mh.pq)-1]
+	mh.pq = mh.pq[:len(mh.pq)-1]
+	mh.sink(1)
+	return rst, true
+}
+
+// 上浮
+func (mh *MaxHeap) swim(idx int) {
+	if idx <= 1 {
+		return
+	}
+	if mh.pq[idx/2] < mh.pq[idx] {
+		mh.pq[idx/2], mh.pq[idx] = mh.pq[idx], mh.pq[idx/2]
+		mh.swim(idx / 2)
+	}
+}
+
+// 下沉
+func (mh *MaxHeap) sink(idx int) {
+	child := 2 * idx
+	if child+1 < len(mh.pq) && mh.pq[child+1] > mh.pq[child] {
+		child++
+	}
+	if child < len(mh.pq) && mh.pq[child] > mh.pq[idx] {
+		mh.pq[child], mh.pq[idx] = mh.pq[idx], mh.pq[child]
+		mh.sink(child)
+	}
+}
