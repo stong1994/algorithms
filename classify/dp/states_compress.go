@@ -470,3 +470,124 @@ func canPartitionKSubsets(nums []int, k int) bool {
 	}
 	return dp[stateNum-1]
 }
+
+// 数组的均值分割
+// 给定你一个整数数组nums
+// 我们要将nums数组中的每个元素移动到A数组 或者B数组中，使得A数组和B数组不为空，并且average(A) == average(B)。
+// 如果可以完成则返回true， 否则返回 false。
+// 注意：对于数组arr, average(arr)是arr的所有元素除以arr长度的和。
+// 1 <= nums.length <= 30
+// 0 <= nums[i] <= 10^4
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/split-array-with-same-average
+func splitArraySameAverage(nums []int) bool {
+	n := len(nums)
+	if n <= 1 {
+		return false
+	}
+	// dp[i][j]找到和为dp[i]的物品的数量数组j，对于数组j中的每个数量，如果dp[i]*n == sum*j[k], 则表示其平均值与整体平均值相同，即可以分为两个均值相等的数组
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	if sum == 0 {
+		return true
+	}
+	dp := make([]map[int]struct{}, sum)
+	dp[0] = map[int]struct{}{0: {}}
+	// 枚举整数数组
+	for _, num := range nums {
+		// 倒序遍历total，避免num被多次使用
+		for total := sum - 1; total >= num; total-- { // 最大和为sum-1,
+			cnts := dp[total-num]
+			if cnts == nil {
+				continue
+			}
+			if dp[total] == nil {
+				dp[total] = make(map[int]struct{})
+			}
+			for cnt := range cnts {
+				if total*n == sum*(cnt+1) {
+					return true
+				}
+				dp[total][cnt+1] = struct{}{}
+			}
+		}
+	}
+	return false
+}
+
+func splitArraySameAverage2(nums []int) bool {
+	// 上一个解法中需要使用哈希操作，题目要求数据范围为0~30，因此可用二进制数组表示
+	n := len(nums)
+	if n <= 1 {
+		return false
+	}
+	sum := 0
+	for _, num := range nums {
+		sum += num
+	}
+	if sum == 0 {
+		return true
+	}
+	dp := make([]int, sum) // 索引表示和，值表示状态（选择的数量组成的二进制数组）
+	dp[0] = 1              // 最低位表示和为0的数量，即数组中元素为0的个数 ，初始化为1，这样在total==num时，cnts=1，cnts左移1位才有意义
+	for _, num := range nums {
+		if num == 0 {
+			dp[0] = dp[0] | dp[0]<<1
+		}
+	}
+	for _, num := range nums {
+		for total := sum - 1; total >= num && total > 0; total-- {
+			dp[total] = dp[total] | (dp[total-num] << 1) // 左移1位，表示每个数量都加1
+			if total*n%sum == 0 {                        // 正常情况下 total*n == sum*cnt 表示存在均值与所有数的均值相等，total * n % sum==0表示存在cnt的可能性
+				cnt := total * n / sum
+				if dp[total]>>cnt&1 == 1 { // 判断是否存在这个cnt
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+// 访问所有节点的最短路径
+// 存在一个由 n 个节点组成的无向连通图，图中的节点按从 0 到 n - 1 编号。
+// 给你一个数组 graph 表示这个图。其中，graph[i] 是一个列表，由所有与节点 i 直接相连的节点组成。
+// 返回能够访问所有节点的最短路径的长度。你可以在任一节点开始和停止，也可以多次重访节点，并且可以重用边。
+//  n == graph.length
+//	1 <= n <= 12
+//	0 <= graph[i].length <n
+//	graph[i] 不包含 i
+//	如果 graph[a] 包含 b ，那么 graph[b] 也包含 a
+//	输入的图总是连通图
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/shortest-path-visiting-all-nodes
+func shortestPathLength(graph [][]int) int {
+	// 状态压缩+广度优先
+	// 在广度优先遍历时，标记好到达每个节点的步长，每个节点的步长等于前一个节点的步长+1，这样能巧妙的解决”返回路径“，并且能够保证只有”最长路径“不会”返回“
+	// 在遍历时，增加访问状态，避免重复访问以及标识是否遍历完成
+	n := len(graph)
+	var queue [][3]int
+	seen := make([][]bool, n)
+	for i := 0; i < n; i++ {
+		queue = append(queue, [3]int{i, 0, 1 << i})
+		seen[i] = make([]bool, 1<<n)
+		seen[i][1<<i] = true
+	}
+	for {
+		idx, step, state := queue[0][0], queue[0][1], queue[0][2]
+		if state == 1<<n-1 {
+			return step
+		}
+		queue = queue[1:]
+		for _, v := range graph[idx] {
+			stateV := state | (1 << v)
+			if seen[v][stateV] {
+				continue
+			}
+			queue = append(queue, [3]int{v, step + 1, stateV})
+			seen[v][stateV] = true
+		}
+	}
+}

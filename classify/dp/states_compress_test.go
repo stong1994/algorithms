@@ -205,3 +205,78 @@ func Test_canPartitionKSubsets(t *testing.T) {
 		})
 	}
 }
+
+func Test_splitArraySameAverage(t *testing.T) {
+	type args struct {
+		nums []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "example1",
+			args: args{nums: []int{1, 2, 3, 4, 5, 6, 7, 8}},
+			want: true,
+		},
+		{
+			name: "example2",
+			args: args{nums: []int{3, 1}},
+			want: false,
+		},
+		{
+			name: "example3",
+			args: args{nums: []int{7, 0, 16, 11, 10, 9, 10, 9, 8}},
+			want: false,
+		}, {
+			name: "example4",
+			args: args{nums: []int{2, 0, 7, 0, 6}},
+			want: true,
+		}, {
+			name: "example5",
+			args: args{nums: []int{0, 0, 3, 9, 8}},
+			want: true,
+		}, {
+			name: "example6",
+			args: args{nums: []int{18, 10, 5, 3}},
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := splitArraySameAverage2(tt.args.nums); got != tt.want {
+				t.Errorf("splitArraySameAverage() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_shortestPathLength(t *testing.T) {
+	type args struct {
+		graph [][]int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			name: "example1",
+			args: args{graph: [][]int{{1, 2, 3}, {0}, {0}, {0}}},
+			want: 4,
+		},
+		{
+			name: "example2",
+			args: args{graph: [][]int{{1}, {0, 2, 4}, {1, 3, 4}, {2}, {1, 2}}},
+			want: 4,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := shortestPathLength(tt.args.graph); got != tt.want {
+				t.Errorf("shortestPathLength() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
