@@ -95,3 +95,43 @@ func findRepeatedDnaSequences2(s string) []string {
 	}
 	return result
 }
+
+// 字符串的排列
+// 给你两个字符串s1和s2 ，写一个函数来判断 s2 是否包含 s1的排列。如果是，返回 true ；否则，返回 false 。
+// 换句话说，s1 的排列之一是 s2 的 子串 。
+// 提示：
+//	1 <= s1.length, s2.length <= 10^4
+//	s1 和 s2 仅包含小写字母
+// 来源：力扣（LeetCode）
+// 链接：https://leetcode-cn.com/problems/permutation-in-string
+func checkInclusion(s1 string, s2 string) bool {
+	if len(s1) > len(s2) {
+		return false
+	}
+	// s1和s2仅包含小写字母，即可用长度为26的数组表示，每个元素的值为对应字母在s1中的个数
+	arr1 := [26]int{}
+	for _, v := range s1 {
+		arr1[v-'a']++
+	}
+	// 用一个长度为len(s1)的双指针，不断向右移动，比较字母个数是否和arr1中一致
+	//store := make(map[int]int)
+	arr2 := [26]int{}
+	l, r := 0, len(s1)-1
+	for i := 0; i < len(s1); i++ {
+		arr2[s2[i]-'a']++
+	}
+
+	if arr1 == arr2 {
+		return true
+	}
+	for r < len(s2)-1 {
+		arr2[s2[l]-'a']--
+		l++
+		r++
+		arr2[s2[r]-'a']++
+		if arr1 == arr2 {
+			return true
+		}
+	}
+	return false
+}
