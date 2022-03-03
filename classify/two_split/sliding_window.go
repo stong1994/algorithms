@@ -72,30 +72,6 @@ func findRepeatedDnaSequences(s string) []string {
 	return result
 }
 
-func findRepeatedDnaSequences2(s string) []string {
-	// 哈希表+前缀和
-	var result []string
-	N, P := 1e5+10, 131313
-	h, p := make([]int, int(N)), make([]int, int(N)) // 哈希数组 次方数组
-	n := len(s)
-	p[0] = 1
-	for i := 1; i <= n; i++ {
-		h[i] = h[i-1]*P + int(s[i-1])
-		p[i] = p[i-1] * P
-	}
-	store := make(map[int]int)
-	for i := 1; i+9 <= len(s); i++ {
-		j := i + 9
-		hash := h[j] - h[i-1]*p[j-i+1]
-		cnt := store[hash]
-		if cnt == 1 {
-			result = append(result, s[i-1:j])
-		}
-		store[hash] = cnt + 1
-	}
-	return result
-}
-
 // 字符串的排列
 // 给你两个字符串s1和s2 ，写一个函数来判断 s2 是否包含 s1的排列。如果是，返回 true ；否则，返回 false 。
 // 换句话说，s1 的排列之一是 s2 的 子串 。

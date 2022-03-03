@@ -64,9 +64,6 @@ func Test_findRepeatedDnaSequences(t *testing.T) {
 			if got := findRepeatedDnaSequences(tt.args.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("findRepeatedDnaSequences() = %v, want %v", got, tt.want)
 			}
-			if got := findRepeatedDnaSequences2(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("findRepeatedDnaSequences2() = %v, want %v", got, tt.want)
-			}
 		})
 	}
 }
