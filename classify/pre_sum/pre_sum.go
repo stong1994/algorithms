@@ -174,3 +174,127 @@ func carPooling(trips [][]int, capacity int) bool {
 	}
 	return true
 }
+
+// 得分最高的最小轮调
+// 给你一个数组nums，我们可以将它按一个非负整数 k 进行轮调，这样可以使数组变为[nums[k], nums[k + 1], ... nums[nums.length - 1],
+// nums[0], nums[1], ..., nums[k-1]]的形式。此后，任何值小于或等于其索引的项都可以记作一分。
+//例如，数组为nums = [2,4,1,3,0]，我们按k = 2进行轮调后，它将变成[1,3,0,2,4]。这将记为 3 分，
+//因为 1 > 0 [不计分]、3 > 1 [不计分]、0 <= 2 [计 1 分]、2 <= 3 [计 1 分]，4 <= 4 [计 1 分]。
+//在所有可能的轮调中，返回我们所能得到的最高分数对应的轮调下标 k 。如果有多个答案，返回满足条件的最小的下标 k
+//来源：力扣（LeetCode）
+//链接：https://leetcode-cn.com/problems/smallest-rotation-with-highest-score
+func bestRotation(nums []int) int {
+	/* 暴力破解
+	var result, maxScore int
+	n := len(nums)
+	// 0<=k<n
+	score := 0
+	for i := 0; i < n; i++ {
+		if nums[i] <= i {
+			score++
+		}
+	}
+	maxScore = score
+	for k := 1; k < n; k++ {
+		first := nums[0]
+		score = 0
+		for i := 1; i < n; i++ {
+			nums[i-1] = nums[i]
+			if nums[i-1] <= i-1 {
+				score++
+			}
+		}
+		nums[n-1] = first
+		if first <= n-1 {
+			score++
+		}
+		if score > maxScore {
+			maxScore = score
+			result = k
+		}
+	}
+	return result
+	*/
+	/*
+		找规律
+		n := len(nums)
+		ks := make([]int, n)
+		for i, num := range nums {
+			// 找到符合num的k区间：向左移动k位后 num <= i-k => k >= num-i
+			if i >= num{
+				// 当i大于num时，此时num可以向左移动到索引为num的j处，也可以向右移动到最右边
+				for j := 0; j <=i-num; j++ {
+					ks[j]++
+				}
+				for j := i+1; j < n; j++ {
+					ks[j]++
+				}
+			}else if i < num {
+				// i < num时，需要把num移到i的右边
+				//l := num-i
+				//r := n-1-i
+				// 此时k为n-l 到 n-r
+				for k := i+1; k <= n-num+i; k++ {
+					ks[k]++
+				}
+			}
+		}
+		//fmt.Println(ks)
+		maxK := 0
+		maxCnt := 0
+		for k, cnt := range ks {
+			if cnt > maxCnt {
+				maxK = k
+				maxCnt = cnt
+			}
+		}
+		return maxK
+	*/
+	// 差分数组
+	n := len(nums)
+	ks := make([]int, n)
+	for i, num := range nums {
+		// 找到符合num的k区间：向左移动k位后 num <= i-k => k >= num-i
+		if i >= num {
+			// 当i大于num时，此时num可以向左移动到索引为num的j处，也可以向右移动到最右边
+			ks[0]++
+			if i-num+1 < n {
+				ks[i-num+1]--
+			}
+			//for j := 0; j <=i-num; j++ {
+			//	ks[j]++
+			//}
+			//for j := i+1; j < n; j++ {
+			//	ks[j]++
+			//}
+			if i+1 < n {
+				ks[i+1]++
+			}
+		} else if i < num {
+			// i < num时，需要把num移到i的右边
+			//l := num-i
+			//r := n-1-i
+			// 此时k为n-l 到 n-r
+			//for k := i+1; k <= n-num+i; k++ {
+			//	ks[k]++
+			//}
+			if i+1 < n {
+				ks[i+1]++
+			}
+			if n-num+i+1 < n {
+				ks[n-num+i+1]--
+			}
+		}
+	}
+	//fmt.Println(ks)
+	maxK := 0
+	score, maxScore := 0, 0
+	for k, diff := range ks {
+		score += diff
+		if score > maxScore {
+			maxK = k
+			maxScore = score
+		}
+	}
+	return maxK
+}
